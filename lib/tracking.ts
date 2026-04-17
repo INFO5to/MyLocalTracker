@@ -23,8 +23,12 @@ export type CourierOption = {
   id: string;
   fullName: string;
   phone: string;
+  vehicleType: string;
+  vehiclePlate: string;
   vehicleLabel: string;
   isActive: boolean;
+  statusLabel: string;
+  updatedAtLabel: string;
 };
 
 export type DashboardMetric = {
@@ -293,13 +297,23 @@ function mapLocationRowToTrackingLocation(row: GenericRecord | null) {
 }
 
 function mapCourierRowToOption(row: GenericRecord): CourierOption {
+  const vehicleType =
+    typeof row.vehicle_type === "string" ? row.vehicle_type : "";
+  const vehiclePlate =
+    typeof row.vehicle_plate === "string" ? row.vehicle_plate : "";
+  const isActive = row.is_active !== false;
+
   return {
     id: typeof row.id === "string" ? row.id : crypto.randomUUID(),
     fullName:
       typeof row.full_name === "string" ? row.full_name : "Repartidor",
     phone: typeof row.phone === "string" ? row.phone : "Sin telefono",
+    vehicleType,
+    vehiclePlate,
     vehicleLabel: buildVehicleLabel(row),
-    isActive: row.is_active !== false,
+    isActive,
+    statusLabel: isActive ? "Disponible" : "En descanso",
+    updatedAtLabel: formatClockTimestamp(row.updated_at),
   };
 }
 
@@ -359,6 +373,8 @@ function buildDashboardSnapshot(
   const inMotion = orders.filter((order) => order.status === "on_the_way");
   const preparing = orders.filter((order) => order.status === "preparing");
   const unassigned = orders.filter((order) => order.courierName === "Por asignar");
+  const activeCouriers = couriers.filter((courier) => courier.isActive);
+  const restingCouriers = couriers.filter((courier) => !courier.isActive);
 
   let highlights: string[];
   const notificationsConfigured = Boolean(
@@ -414,8 +430,11 @@ function buildDashboardSnapshot(
       },
       {
         label: "Repartidores",
-        value: String(couriers.length),
-        caption: "activos",
+        value: String(activeCouriers.length),
+        caption:
+          restingCouriers.length > 0
+            ? `${restingCouriers.length} en descanso`
+            : "sin descansos",
       },
     ],
     orders,
@@ -471,8 +490,9 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
         .limit(24),
       supabase
         .from("couriers")
-        .select("id, full_name, phone, vehicle_type, vehicle_plate, is_active")
-        .eq("is_active", true)
+        .select(
+          "id, full_name, phone, vehicle_type, vehicle_plate, is_active, updated_at",
+        )
         .order("full_name", { ascending: true }),
     ]);
 

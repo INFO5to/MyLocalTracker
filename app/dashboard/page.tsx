@@ -4,6 +4,7 @@ import { RealtimeRefresh } from "@/app/_components/realtime-refresh";
 import { SiteHeader } from "@/app/_components/site-header";
 import { StatusPill } from "@/app/_components/status-pill";
 import { advanceOrderStatus } from "@/app/dashboard/actions";
+import { CourierPanel } from "@/app/dashboard/_components/courier-panel";
 import { CreateOrderForm } from "@/app/dashboard/_components/create-order-form";
 import { requireInternalSession } from "@/lib/auth";
 import { getDashboardSnapshot } from "@/lib/tracking";
@@ -139,7 +140,11 @@ export default async function DashboardPage() {
         </article>
 
         <div className="space-y-6">
-          <CreateOrderForm couriers={dashboard.couriers} />
+          <CreateOrderForm
+            couriers={dashboard.couriers.filter((courier) => courier.isActive)}
+          />
+
+          <CourierPanel couriers={dashboard.couriers} />
 
           <article className="panel">
             <span className="eyebrow">Link publico</span>

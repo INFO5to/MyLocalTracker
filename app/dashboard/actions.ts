@@ -13,6 +13,10 @@ export type CreateOrderActionState = {
   trackingCode?: string;
 };
 
+function parseBooleanFlag(value: string) {
+  return value === "true";
+}
+
 function asString(value: FormDataEntryValue | null) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -281,5 +285,49 @@ export async function advanceOrderStatus(formData: FormData) {
         : trackingCode
     }`,
   );
+  refresh();
+}
+
+export async function saveCourierAction(formData: FormData) {
+  const supabase = await getSupabaseServerClient();
+
+  if (!supabase) {
+    throw new Error("Supabase no esta configurado.");
+  }
+
+  await requireInternalActionAccess(["owner", "staff"]);
+
+  const courierId = asString(formData.get("courier_id"));
+  const fullName = asString(formData.get("full_name"));
+  const phone = asString(formData.get("phone"));
+  const vehicleType = asString(formData.get("vehicle_type"));
+  const vehiclePlate = asString(formData.get("vehicle_plate"));
+  const isActive = parseBooleanFlag(asString(formData.get("is_active")));
+
+  if (!fullName) {
+    throw new Error("El nombre del repartidor es obligatorio.");
+  }
+
+  const payload = {
+    full_name: fullName,
+    phone: phone || null,
+    vehicle_type: vehicleType || null,
+    vehicle_plate: vehiclePlate || null,
+    is_active: isActive,
+  };
+
+  const query = courierId
+    ? supabase.from("couriers").update(payload).eq("id", courierId)
+    : supabase.from("couriers").insert(payload);
+
+  const { error } = await query;
+
+  if (error) {
+    throw new Error(
+      error.message ?? "No se pudo guardar el repartidor en Supabase.",
+    );
+  }
+
+  revalidatePath("/dashboard");
   refresh();
 }
