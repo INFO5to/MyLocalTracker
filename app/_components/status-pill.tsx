@@ -1,11 +1,31 @@
 import { getStatusMeta, type OrderStatus } from "@/lib/tracking";
 
 const toneClassName = {
-  slate: "bg-slate-200/80 text-slate-700",
-  amber: "bg-amber-100 text-amber-700",
-  orange: "bg-orange-100 text-orange-700",
-  teal: "bg-teal-100 text-teal-700",
-  green: "bg-emerald-100 text-emerald-700",
+  slate: {
+    background: "color-mix(in srgb, var(--foreground) 10%, transparent 90%)",
+    borderColor: "color-mix(in srgb, var(--foreground) 12%, transparent 88%)",
+    color: "var(--muted)",
+  },
+  amber: {
+    background: "color-mix(in srgb, var(--warning) 18%, transparent 82%)",
+    borderColor: "color-mix(in srgb, var(--warning) 24%, transparent 76%)",
+    color: "color-mix(in srgb, var(--warning) 36%, var(--foreground) 64%)",
+  },
+  orange: {
+    background: "color-mix(in srgb, var(--brand) 16%, transparent 84%)",
+    borderColor: "color-mix(in srgb, var(--brand) 26%, transparent 74%)",
+    color: "var(--brand-deep)",
+  },
+  teal: {
+    background: "color-mix(in srgb, var(--accent) 14%, transparent 86%)",
+    borderColor: "color-mix(in srgb, var(--accent) 22%, transparent 78%)",
+    color: "color-mix(in srgb, var(--accent) 54%, var(--foreground) 46%)",
+  },
+  green: {
+    background: "color-mix(in srgb, var(--success) 18%, transparent 82%)",
+    borderColor: "color-mix(in srgb, var(--success) 24%, transparent 76%)",
+    color: "color-mix(in srgb, var(--success) 58%, var(--foreground) 42%)",
+  },
 } as const;
 
 export function StatusPill({ status }: { status: OrderStatus }) {
@@ -13,7 +33,8 @@ export function StatusPill({ status }: { status: OrderStatus }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${toneClassName[meta.tone]}`}
+      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]"
+      style={toneClassName[meta.tone]}
     >
       <span
         className="status-dot"

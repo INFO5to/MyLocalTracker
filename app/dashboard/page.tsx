@@ -76,10 +76,10 @@ export default async function DashboardPage() {
 
           <div className="mt-6 space-y-4">
             {dashboard.orders.map((order) => (
-              <article
-                key={order.code}
-                className="rounded-[1.7rem] border border-white/60 bg-white/75 p-5"
-              >
+                <article
+                  key={order.code}
+                  className="soft-card"
+                >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
@@ -104,13 +104,13 @@ export default async function DashboardPage() {
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Link
                     href={`/track/${order.publicToken}`}
-                    className="rounded-full bg-[color:var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[color:var(--brand-deep)]"
+                    className="ios-button"
                   >
                     Abrir tracking
                   </Link>
                   <Link
                     href={`/driver/${order.code}`}
-                    className="rounded-full border border-[rgba(23,32,51,0.08)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:-translate-y-0.5"
+                    className="ios-button-secondary"
                   >
                     Vista repartidor
                   </Link>
@@ -125,7 +125,7 @@ export default async function DashboardPage() {
                       />
                       <button
                         type="submit"
-                        className="rounded-full border border-[rgba(23,32,51,0.08)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:-translate-y-0.5"
+                        className="ios-button-ghost"
                       >
                         {order.nextStatusLabel}
                       </button>
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
           <article className="panel">
             <span className="eyebrow">Link publico</span>
             <h2 className="section-title mt-4">Base actual del tracking compartido</h2>
-            <div className="mt-6 rounded-[1.4rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4">
+            <div className="soft-card-strong mt-6">
               <p className="text-sm uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
                 {dashboard.trackingBaseUrl.mode === "public"
                   ? "URL publica"
@@ -168,7 +168,7 @@ export default async function DashboardPage() {
               {dashboard.highlights.map((highlight) => (
                 <div
                   key={highlight}
-                  className="rounded-[1.4rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4 text-sm leading-7 text-[color:var(--muted)]"
+                  className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]"
                 >
                   {highlight}
                 </div>

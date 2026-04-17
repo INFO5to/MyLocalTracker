@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signOutInternalAction } from "@/app/auth/actions";
+import { ThemeToggle } from "@/app/_components/theme-toggle";
 import { getOptionalInternalSession } from "@/lib/auth";
 
 export async function SiteHeader() {
@@ -21,27 +22,31 @@ export async function SiteHeader() {
         </div>
       </Link>
 
-      <nav className="flex flex-wrap gap-2 text-sm">
-        <Link href="/" className="link-chip">
-          Inicio
-        </Link>
-        {internalSession ? (
-          <>
-            <Link href="/dashboard" className="link-chip">
-              Dashboard
-            </Link>
-            <form action={signOutInternalAction}>
-              <button type="submit" className="link-chip">
-                Cerrar sesion
-              </button>
-            </form>
-          </>
-        ) : (
-          <Link href="/login" className="link-chip">
-            Acceso interno
+      <div className="flex flex-col gap-3 sm:items-end">
+        <ThemeToggle />
+
+        <nav className="flex flex-wrap items-center gap-2 text-sm">
+          <Link href="/" className="ios-button-quiet">
+            Inicio
           </Link>
-        )}
-      </nav>
+          {internalSession ? (
+            <>
+              <Link href="/dashboard" className="ios-button-secondary">
+                Dashboard
+              </Link>
+              <form action={signOutInternalAction}>
+                <button type="submit" className="ios-button-ghost">
+                  Cerrar sesion
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link href="/login" className="ios-button-secondary">
+              Acceso interno
+            </Link>
+          )}
+        </nav>
+      </div>
     </header>
   );
 }

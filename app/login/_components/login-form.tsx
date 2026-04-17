@@ -72,7 +72,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-full bg-[color:var(--brand)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[color:var(--brand-deep)] disabled:cursor-not-allowed disabled:opacity-70"
+          className="ios-button"
         >
           {pending ? "Entrando..." : "Entrar al panel"}
         </button>

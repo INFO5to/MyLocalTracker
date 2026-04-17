@@ -36,7 +36,7 @@ export function TrackingShareCard({
           : `El link ya existe, pero conviene compartirlo cuando el pedido pase a En camino para que el cliente vea movimiento real en el mapa.`}
       </p>
 
-      <div className="mt-6 rounded-[1.4rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4">
+      <div className="soft-card-strong mt-6">
         <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
           URL publica
         </p>
@@ -53,7 +53,7 @@ export function TrackingShareCard({
         <button
           type="button"
           onClick={handleCopy}
-          className="rounded-full bg-[color:var(--brand)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[color:var(--brand-deep)]"
+          className="ios-button"
         >
           Copiar link
         </button>
@@ -61,7 +61,7 @@ export function TrackingShareCard({
           href={trackingUrl}
           target="_blank"
           rel="noreferrer"
-          className="rounded-full border border-[rgba(23,32,51,0.08)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:-translate-y-0.5"
+          className="ios-button-secondary"
         >
           Abrir tracking publico
         </a>

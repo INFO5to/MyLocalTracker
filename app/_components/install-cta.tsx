@@ -118,7 +118,7 @@ export function InstallCta() {
           onClick={() => {
             void handleInstall();
           }}
-          className="mt-5 rounded-full bg-[color:var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[color:var(--brand-deep)]"
+          className="ios-button mt-5"
         >
           Instalar LocalTracker
         </button>

@@ -25,10 +25,7 @@ export default async function Home() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
-              href="/login"
-              className="rounded-full bg-[color:var(--brand)] px-5 py-3 text-sm font-semibold text-white transition hover:translate-y-[-2px] hover:bg-[color:var(--brand-deep)]"
-            >
+            <Link href="/login" className="ios-button">
               Entrar al panel interno
             </Link>
             <span className="link-chip border-none bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
@@ -66,7 +63,7 @@ export default async function Home() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-[1.6rem] border border-white/60 bg-white/70 p-4"
+                className="soft-card-strong"
               >
                 <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--brand-deep)]">
                   {item.title}
@@ -93,7 +90,7 @@ export default async function Home() {
             ].map((item) => (
               <div
                 key={item}
-                className="rounded-[1.5rem] border border-white/60 bg-white/70 p-4 text-sm leading-7 text-[color:var(--muted)]"
+                className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]"
               >
                 {item}
               </div>
@@ -114,7 +111,7 @@ export default async function Home() {
             ].map((item) => (
               <div
                 key={item}
-                className="rounded-[1.5rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4 text-sm leading-7 text-[color:var(--muted)]"
+                className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]"
               >
                 {item}
               </div>

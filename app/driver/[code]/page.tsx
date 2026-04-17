@@ -85,10 +85,10 @@ export default async function DriverPage({ params }: DriverPageProps) {
 
           <div className="flex flex-wrap gap-3">
             <StatusPill status={tracking.status} />
-            <Link href={`/track/${tracking.publicToken}`} className="link-chip">
+            <Link href={`/track/${tracking.publicToken}`} className="ios-button-secondary">
               Abrir tracking publico
             </Link>
-            <Link href="/dashboard" className="link-chip">
+            <Link href="/dashboard" className="ios-button-quiet">
               Volver al dashboard
             </Link>
           </div>
@@ -105,7 +105,7 @@ export default async function DriverPage({ params }: DriverPageProps) {
                 Cliente: {tracking.customerName}. Destino: {tracking.destination}.
               </p>
             </div>
-            <div className="rounded-[1.5rem] border border-white/60 bg-white/75 p-4 text-sm text-[color:var(--muted)]">
+            <div className="soft-card-strong text-sm text-[color:var(--muted)]">
               <p className="text-xs uppercase tracking-[0.22em]">Ultima senal</p>
               <p className="mt-2 font-semibold text-[color:var(--foreground)]">
                 {tracking.liveLocation?.recordedAtLabel ?? tracking.lastUpdatedLabel}
@@ -132,7 +132,7 @@ export default async function DriverPage({ params }: DriverPageProps) {
             {tracking.route.map((stop) => (
               <div
                 key={stop.label}
-                className="rounded-[1.4rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4"
+                className="soft-card-strong"
               >
                 <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
                   {stop.kind}
@@ -166,7 +166,7 @@ export default async function DriverPage({ params }: DriverPageProps) {
                   />
                   <button
                     type="submit"
-                    className="rounded-full bg-[color:var(--brand)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[color:var(--brand-deep)]"
+                    className="ios-button"
                   >
                     {nextStatusLabel}
                   </button>

@@ -223,7 +223,7 @@ export function DriverTrackingConsole({
         reflejado en el tracking publico.
       </p>
 
-      <div className="mt-6 rounded-[1.5rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4 text-sm leading-7 text-[color:var(--muted)]">
+      <div className="soft-card-strong mt-6 text-sm leading-7 text-[color:var(--muted)]">
         <p>Pedido: {trackingCode}</p>
         <p>Estado actual: {currentStatus}</p>
         <p>
@@ -239,7 +239,7 @@ export function DriverTrackingConsole({
             void captureCurrentLocation();
           }}
           disabled={isSending || !courierId}
-          className="rounded-full bg-[color:var(--brand)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[color:var(--brand-deep)] disabled:cursor-not-allowed disabled:opacity-60"
+          className="ios-button"
         >
           {isSending ? "Enviando..." : "Enviar ubicacion una vez"}
         </button>
@@ -251,7 +251,7 @@ export function DriverTrackingConsole({
               stopTracking();
               setMessage("Tracking continuo detenido.");
             }}
-            className="rounded-full border border-[rgba(23,32,51,0.08)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:-translate-y-0.5"
+            className="ios-button-secondary"
           >
             Detener tracking continuo
           </button>
@@ -262,7 +262,7 @@ export function DriverTrackingConsole({
               void startTracking();
             }}
             disabled={!courierId}
-            className="rounded-full border border-[rgba(23,32,51,0.08)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            className="ios-button-secondary"
           >
             Iniciar tracking cada 5s
           </button>
@@ -274,7 +274,7 @@ export function DriverTrackingConsole({
             void simulateMovement();
           }}
           disabled={isSending || !courierId}
-          className="rounded-full border border-[rgba(23,32,51,0.08)] bg-[rgba(15,118,110,0.08)] px-5 py-3 text-sm font-semibold text-[color:var(--accent)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+          className="ios-button-ghost"
         >
           Simular avance de prueba
         </button>
@@ -283,7 +283,7 @@ export function DriverTrackingConsole({
       <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">{message}</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-[1.4rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4">
+        <div className="soft-card-strong">
           <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
             Ultima coordenada enviada
           </p>
@@ -299,7 +299,7 @@ export function DriverTrackingConsole({
           </p>
         </div>
 
-        <div className="rounded-[1.4rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4">
+        <div className="soft-card-strong">
           <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
             Destino del cliente
           </p>

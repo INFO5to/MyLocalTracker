@@ -78,7 +78,7 @@ export default async function TrackPage({ params }: TrackPageProps) {
               </p>
             </div>
 
-            <div className="rounded-[1.6rem] border border-white/60 bg-white/75 p-4 text-sm text-[color:var(--muted)]">
+            <div className="soft-card-strong text-sm text-[color:var(--muted)]">
               <p className="text-xs uppercase tracking-[0.22em]">
                 Ultima actualizacion
               </p>
@@ -164,7 +164,7 @@ export default async function TrackPage({ params }: TrackPageProps) {
               <p>Contacto: {tracking.driver.phone}</p>
             </div>
 
-            <div className="mt-6 rounded-[1.5rem] border border-[rgba(23,32,51,0.08)] bg-white/72 p-4">
+            <div className="soft-card-strong mt-6">
               <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
                 Items
               </p>
