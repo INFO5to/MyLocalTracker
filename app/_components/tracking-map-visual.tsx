@@ -77,6 +77,8 @@ export function TrackingMapVisual({
   const points = [courierPoint, destinationPoint].filter(
     (point): point is MapPoint => point !== null,
   );
+  const missingDestination = !destinationPoint;
+  const missingCourier = !courierPoint;
 
   if (points.length === 0) {
     return (
@@ -86,8 +88,9 @@ export function TrackingMapVisual({
             Aun no hay coordenadas para este pedido.
           </p>
           <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
-            El mapa se activa cuando capturas la ubicacion del cliente o cuando el
-            repartidor envia su primer punto desde la ruta.
+            A este pedido le faltan las coordenadas del destino y el repartidor
+            aun no envia su primera senal. El mapa se activa en cuanto exista al
+            menos uno de esos dos puntos.
           </p>
         </div>
       </div>
@@ -150,9 +153,20 @@ export function TrackingMapVisual({
           <div className="tracking-map-overlay__note">
             Ultima posicion: {courierLocation.recordedAtLabel}
           </div>
+        ) : missingDestination ? (
+          <div className="tracking-map-overlay__note">
+            Solo hay un punto disponible. Faltan coordenadas del destino y la
+            primera senal del repartidor.
+          </div>
+        ) : missingCourier ? (
+          <div className="tracking-map-overlay__note">
+            Ya se ve el destino. Falta que el repartidor envie su primera
+            ubicacion.
+          </div>
         ) : (
           <div className="tracking-map-overlay__note">
-            Esperando la primera posicion del repartidor
+            Ya llego la senal del repartidor. Falta capturar el destino para
+            unir ambos puntos.
           </div>
         )}
       </div>

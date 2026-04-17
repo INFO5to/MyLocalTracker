@@ -109,6 +109,7 @@ export type PublicTrackingOrder = {
 };
 
 type GenericRecord = Record<string, unknown>;
+const appTimeZone = process.env.APP_TIME_ZONE ?? "America/Mexico_City";
 
 const statusMetaMap: Record<OrderStatus, StatusMeta> = {
   pending: {
@@ -249,6 +250,7 @@ function formatUpdateTimestamp(value: unknown) {
     return `Actualizado ${new Date(value).toLocaleTimeString("es-MX", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: appTimeZone,
     })}`;
   }
 
@@ -260,6 +262,7 @@ function formatClockTimestamp(value: unknown) {
     return new Date(value).toLocaleTimeString("es-MX", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: appTimeZone,
     });
   }
 
