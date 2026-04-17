@@ -4,7 +4,6 @@ import { RealtimeRefresh } from "@/app/_components/realtime-refresh";
 import { SiteHeader } from "@/app/_components/site-header";
 import { StatusPill } from "@/app/_components/status-pill";
 import { advanceOrderStatus } from "@/app/dashboard/actions";
-import { CourierPanel } from "@/app/dashboard/_components/courier-panel";
 import { CreateOrderForm } from "@/app/dashboard/_components/create-order-form";
 import { requireInternalSession } from "@/lib/auth";
 import { getDashboardSnapshot } from "@/lib/tracking";
@@ -25,20 +24,23 @@ export default async function DashboardPage() {
       <section className="panel panel-strong mt-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
-            <span className="eyebrow">Centro operativo</span>
+            <span className="eyebrow">Modulo de pedidos</span>
             <div className="space-y-3">
               <h1 className="display-title text-4xl sm:text-5xl">
-                Panel para ver pedidos, ETA y cuellos de botella en vivo.
+                Pedidos, ETA y estados en una sola vista limpia del turno.
               </h1>
               <p className="max-w-3xl text-base leading-7 text-[color:var(--muted)]">
-                Esta pantalla esta pensada para duenos o personal operativo. Si
-                las variables de Supabase estan presentes, los refrescos en vivo
-                se activan automaticamente con Realtime.
+                Esta pantalla se queda enfocada solo en ordenes. La gestion de
+                repartidores vive en su propio modulo para que el tablero de
+                pedidos respire mejor y sea mas rapido de leer.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
+            <Link href="/couriers" className="link-chip">
+              Ir a repartidores
+            </Link>
             {latestOrder ? (
               <Link href={`/track/${latestOrder.publicToken}`} className="link-chip">
                 Abrir ultimo tracking
@@ -63,7 +65,7 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <section className="mt-6 grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
         <article className="panel">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -143,8 +145,6 @@ export default async function DashboardPage() {
           <CreateOrderForm
             couriers={dashboard.couriers.filter((courier) => courier.isActive)}
           />
-
-          <CourierPanel couriers={dashboard.couriers} />
 
           <article className="panel">
             <span className="eyebrow">Link publico</span>

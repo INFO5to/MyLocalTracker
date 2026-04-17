@@ -329,5 +329,6 @@ export async function saveCourierAction(formData: FormData) {
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/couriers");
   refresh();
 }

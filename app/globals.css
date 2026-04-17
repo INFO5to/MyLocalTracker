@@ -385,6 +385,13 @@ select {
     background: transparent;
   }
 
+  .ios-button-secondary svg,
+  .ios-button-ghost svg,
+  .ios-button-quiet svg,
+  .ios-button svg {
+    flex-shrink: 0;
+  }
+
   .ios-button[disabled],
   .ios-button-secondary[disabled],
   .ios-button-ghost[disabled],

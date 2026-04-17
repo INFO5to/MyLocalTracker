@@ -517,6 +517,33 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
   }
 }
 
+export async function getCourierRoster(): Promise<CourierOption[]> {
+  const supabase = await getSupabaseServerClient();
+
+  if (!supabase) {
+    return [];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("couriers")
+      .select(
+        "id, full_name, phone, vehicle_type, vehicle_plate, is_active, updated_at",
+      )
+      .order("full_name", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return (data ?? []).map((row) =>
+      mapCourierRowToOption(row as GenericRecord),
+    );
+  } catch {
+    return [];
+  }
+}
+
 function mapEventRowToTimelineEvent(row: GenericRecord, fallbackKey: string) {
   return {
     id:
