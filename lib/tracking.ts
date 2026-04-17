@@ -694,18 +694,19 @@ export async function getPublicTrackingOrder(
     const { data: rpcEventsData } = await supabase.rpc("get_public_tracking_events", {
       lookup_token: trackingToken,
     });
+    const rpcOrderRecord = rpcOrderRow as GenericRecord;
 
     return buildTrackingOrderFromSources(
       trackingToken,
-      rpcOrderRow as GenericRecord,
+      rpcOrderRecord,
       {
-        latitude: rpcOrderRow.live_latitude,
-        longitude: rpcOrderRow.live_longitude,
-        accuracy_meters: rpcOrderRow.live_accuracy_meters,
-        speed_mps: rpcOrderRow.live_speed_mps,
-        heading_degrees: rpcOrderRow.live_heading_degrees,
-        source: rpcOrderRow.live_source,
-        recorded_at: rpcOrderRow.live_recorded_at,
+        latitude: rpcOrderRecord.live_latitude,
+        longitude: rpcOrderRecord.live_longitude,
+        accuracy_meters: rpcOrderRecord.live_accuracy_meters,
+        speed_mps: rpcOrderRecord.live_speed_mps,
+        heading_degrees: rpcOrderRecord.live_heading_degrees,
+        source: rpcOrderRecord.live_source,
+        recorded_at: rpcOrderRecord.live_recorded_at,
       },
       ((rpcEventsData ?? []) as GenericRecord[]).map((event) => event),
     );
