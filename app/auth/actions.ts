@@ -21,6 +21,26 @@ function sanitizeNextPath(value: string) {
   return value;
 }
 
+function resolveRoleAwareRedirect(nextPath: string | null, role: "owner" | "staff" | "driver") {
+  const fallbackPath = role === "driver" ? "/driver" : "/dashboard";
+
+  if (!nextPath) {
+    return fallbackPath;
+  }
+
+  if (role === "driver") {
+    if (nextPath === "/dashboard" || nextPath.startsWith("/couriers")) {
+      return fallbackPath;
+    }
+  }
+
+  if ((role === "owner" || role === "staff") && nextPath === "/driver") {
+    return fallbackPath;
+  }
+
+  return nextPath;
+}
+
 export async function signInInternalAction(
   _prevState: LoginActionState,
   formData: FormData,
@@ -70,10 +90,7 @@ export async function signInInternalAction(
     };
   }
 
-  const fallbackPath =
-    internalSession.profile.role === "driver" ? "/driver" : "/dashboard";
-
-  redirect(nextPath ?? fallbackPath);
+  redirect(resolveRoleAwareRedirect(nextPath, internalSession.profile.role));
 }
 
 export async function signOutInternalAction() {
