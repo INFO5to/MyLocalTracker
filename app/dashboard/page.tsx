@@ -6,12 +6,102 @@ import { StatusPill } from "@/app/_components/status-pill";
 import { advanceOrderStatus } from "@/app/dashboard/actions";
 import { CreateOrderForm } from "@/app/dashboard/_components/create-order-form";
 import { requireInternalSession } from "@/lib/auth";
-import { getDashboardSnapshot } from "@/lib/tracking";
+import { getDashboardSnapshot, type DashboardOrder } from "@/lib/tracking";
+
+function OrdersPanel({
+  title,
+  eyebrow,
+  description,
+  orders,
+}: {
+  title: string;
+  eyebrow: string;
+  description: string;
+  orders: DashboardOrder[];
+}) {
+  return (
+    <article className="panel">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <span className="eyebrow">{eyebrow}</span>
+          <h2 className="section-title mt-4">{title}</h2>
+        </div>
+        <span className="link-chip">{orders.length} registros</span>
+      </div>
+
+      <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+        {description}
+      </p>
+
+      <div className="mt-6 space-y-4">
+        {orders.length === 0 ? (
+          <div className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]">
+            Todavia no hay pedidos en esta seccion.
+          </div>
+        ) : (
+          orders.map((order) => (
+            <article key={order.code} className="soft-card">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
+                    {order.code}
+                  </p>
+                  <h3 className="mt-2 text-xl font-semibold">
+                    {order.customerName}
+                  </h3>
+                  <p className="mt-2 text-sm text-[color:var(--muted)]">
+                    {order.address}
+                  </p>
+                </div>
+                <StatusPill status={order.status} />
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-3 text-sm text-[color:var(--muted)]">
+                <span>Repartidor: {order.courierName}</span>
+                <span>{order.etaLabel}</span>
+                <span>{order.totalLabel}</span>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href={`/track/${order.publicToken}`} className="ios-button">
+                  Abrir tracking
+                </Link>
+                <Link
+                  href={`/driver/${order.code}`}
+                  className="ios-button-secondary"
+                >
+                  Vista repartidor
+                </Link>
+                {order.nextStatus && order.nextStatusLabel ? (
+                  <form action={advanceOrderStatus}>
+                    <input type="hidden" name="order_id" value={order.id} />
+                    <input type="hidden" name="tracking_code" value={order.code} />
+                    <input
+                      type="hidden"
+                      name="current_status"
+                      value={order.status}
+                    />
+                    <button type="submit" className="ios-button-ghost">
+                      {order.nextStatusLabel}
+                    </button>
+                  </form>
+                ) : null}
+                <span className="link-chip">{order.lastUpdateLabel}</span>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+    </article>
+  );
+}
 
 export default async function DashboardPage() {
   await requireInternalSession(["owner", "staff"], "/dashboard");
   const dashboard = await getDashboardSnapshot();
   const latestOrder = dashboard.orders[0] ?? null;
+  const activeOrders = dashboard.orders.filter((order) => order.status !== "delivered");
+  const deliveredOrders = dashboard.orders.filter((order) => order.status === "delivered");
 
   return (
     <main className="page-shell">
@@ -65,122 +155,65 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+      <section className="mt-6">
+        <CreateOrderForm
+          couriers={dashboard.couriers.filter((courier) => courier.isActive)}
+        />
+      </section>
+
+      <section className="mt-6 grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+        <OrdersPanel
+          eyebrow="Pedidos activos"
+          title="Turno en movimiento"
+          description="Aqui quedan los pedidos que todavia estan en operacion: pendientes, confirmados, preparando, listos o en camino."
+          orders={activeOrders}
+        />
+
+        <OrdersPanel
+          eyebrow="Pedidos entregados"
+          title="Historico del turno"
+          description="Este lado se reserva para lo ya entregado, asi puedes cerrar visualmente el turno sin mezclarlo con lo que sigue vivo."
+          orders={deliveredOrders}
+        />
+      </section>
+
+      <section className="mt-6 grid gap-6 xl:grid-cols-3">
         <article className="panel">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <span className="eyebrow">Pedidos activos</span>
-              <h2 className="section-title mt-4">Tablero del turno actual</h2>
-            </div>
-            <p className="text-sm text-[color:var(--muted)]">
-              {dashboard.orders.length} pedidos visibles
+          <span className="eyebrow">Link publico</span>
+          <h2 className="section-title mt-4">Base actual del tracking compartido</h2>
+          <div className="soft-card-strong mt-6">
+            <p className="text-sm uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
+              {dashboard.trackingBaseUrl.mode === "public"
+                ? "URL publica"
+                : dashboard.trackingBaseUrl.mode === "lan"
+                  ? "URL de red local"
+                  : "URL local"}
+            </p>
+            <p className="mt-3 break-all text-base font-semibold text-[color:var(--foreground)]">
+              {dashboard.trackingBaseUrl.value}
+            </p>
+            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+              {dashboard.trackingBaseUrl.note}
             </p>
           </div>
+        </article>
 
-          <div className="mt-6 space-y-4">
-            {dashboard.orders.map((order) => (
-                <article
-                  key={order.code}
-                  className="soft-card"
-                >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                      {order.code}
-                    </p>
-                    <h3 className="mt-2 text-xl font-semibold">
-                      {order.customerName}
-                    </h3>
-                    <p className="mt-2 text-sm text-[color:var(--muted)]">
-                      {order.address}
-                    </p>
-                  </div>
-                  <StatusPill status={order.status} />
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3 text-sm text-[color:var(--muted)]">
-                  <span>Repartidor: {order.courierName}</span>
-                  <span>{order.etaLabel}</span>
-                  <span>{order.totalLabel}</span>
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <Link
-                    href={`/track/${order.publicToken}`}
-                    className="ios-button"
-                  >
-                    Abrir tracking
-                  </Link>
-                  <Link
-                    href={`/driver/${order.code}`}
-                    className="ios-button-secondary"
-                  >
-                    Vista repartidor
-                  </Link>
-                  {order.nextStatus && order.nextStatusLabel ? (
-                    <form action={advanceOrderStatus}>
-                      <input type="hidden" name="order_id" value={order.id} />
-                      <input type="hidden" name="tracking_code" value={order.code} />
-                      <input
-                        type="hidden"
-                        name="current_status"
-                        value={order.status}
-                      />
-                      <button
-                        type="submit"
-                        className="ios-button-ghost"
-                      >
-                        {order.nextStatusLabel}
-                      </button>
-                    </form>
-                  ) : null}
-                  <span className="link-chip">{order.lastUpdateLabel}</span>
-                </div>
-              </article>
+        <article className="panel">
+          <span className="eyebrow">Alertas del turno</span>
+          <h2 className="section-title mt-4">Donde conviene poner atencion</h2>
+          <div className="mt-6 space-y-3">
+            {dashboard.highlights.map((highlight) => (
+              <div
+                key={highlight}
+                className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]"
+              >
+                {highlight}
+              </div>
             ))}
           </div>
         </article>
 
         <div className="space-y-6">
-          <CreateOrderForm
-            couriers={dashboard.couriers.filter((courier) => courier.isActive)}
-          />
-
-          <article className="panel">
-            <span className="eyebrow">Link publico</span>
-            <h2 className="section-title mt-4">Base actual del tracking compartido</h2>
-            <div className="soft-card-strong mt-6">
-              <p className="text-sm uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
-                {dashboard.trackingBaseUrl.mode === "public"
-                  ? "URL publica"
-                  : dashboard.trackingBaseUrl.mode === "lan"
-                    ? "URL de red local"
-                    : "URL local"}
-              </p>
-              <p className="mt-3 break-all text-base font-semibold text-[color:var(--foreground)]">
-                {dashboard.trackingBaseUrl.value}
-              </p>
-              <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-                {dashboard.trackingBaseUrl.note}
-              </p>
-            </div>
-          </article>
-
-          <article className="panel">
-            <span className="eyebrow">Alertas del turno</span>
-            <h2 className="section-title mt-4">Donde conviene poner atencion</h2>
-            <div className="mt-6 space-y-3">
-              {dashboard.highlights.map((highlight) => (
-                <div
-                  key={highlight}
-                  className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]"
-                >
-                  {highlight}
-                </div>
-              ))}
-            </div>
-          </article>
-
           <article className="panel">
             <span className="eyebrow">Roadmap inmediato</span>
             <h2 className="section-title mt-4">Siguiente capa natural del MVP</h2>
