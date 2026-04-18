@@ -36,7 +36,8 @@ export async function signInInternalAction(
 
   const email = asString(formData.get("email")).toLowerCase();
   const password = asString(formData.get("password"));
-  const nextPath = sanitizeNextPath(asString(formData.get("next")) || "/dashboard");
+  const nextPathInput = asString(formData.get("next"));
+  const nextPath = nextPathInput ? sanitizeNextPath(nextPathInput) : null;
 
   if (!email || !password) {
     return {
@@ -69,7 +70,10 @@ export async function signInInternalAction(
     };
   }
 
-  redirect(nextPath);
+  const fallbackPath =
+    internalSession.profile.role === "driver" ? "/driver" : "/dashboard";
+
+  redirect(nextPath ?? fallbackPath);
 }
 
 export async function signOutInternalAction() {

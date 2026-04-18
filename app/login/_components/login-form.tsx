@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   signInInternalAction,
   type LoginActionState,
@@ -15,6 +15,32 @@ const initialState: LoginActionState = {
   status: "idle",
   message: "",
 };
+
+const roleModes = {
+  owner: {
+    label: "Dominante",
+    title: "Control total del sistema",
+    description:
+      "Gestiona pedidos, repartidores y toda la operacion interna desde el panel principal.",
+    emailPlaceholder: "dueno@localtracker.app",
+  },
+  staff: {
+    label: "Staff",
+    title: "Operacion del turno",
+    description:
+      "Pensado para quien confirma pedidos, mueve estados y coordina el turno.",
+    emailPlaceholder: "staff@localtracker.app",
+  },
+  driver: {
+    label: "Driver",
+    title: "Ruta y seguimiento vivo",
+    description:
+      "Usa este acceso para entrar a la capa interna del repartidor y emitir ubicaciones.",
+    emailPlaceholder: "driver@localtracker.app",
+  },
+} as const;
+
+type RoleMode = keyof typeof roleModes;
 
 function UserAccessIcon() {
   return (
@@ -39,9 +65,12 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
     signInInternalAction,
     initialState,
   );
+  const [selectedRole, setSelectedRole] = useState<RoleMode>("owner");
+  const [showRoleMenu, setShowRoleMenu] = useState(false);
 
   const message = state.message || initialMessage || "";
   const isError = state.status === "error" || Boolean(initialMessage);
+  const roleMode = roleModes[selectedRole];
 
   return (
     <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -89,22 +118,54 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
 
       <form action={formAction} className="panel panel-strong">
         <div className="flex flex-col items-center text-center">
-          <div className="access-avatar">
+          <button
+            type="button"
+            className="access-avatar"
+            aria-expanded={showRoleMenu}
+            aria-controls="login-role-menu"
+            onClick={() => {
+              setShowRoleMenu((currentValue) => !currentValue);
+            }}
+          >
             <UserAccessIcon />
-          </div>
+          </button>
+          {showRoleMenu ? (
+            <div
+              id="login-role-menu"
+              className="mt-4 flex flex-wrap justify-center gap-2"
+            >
+              {(
+                Object.entries(roleModes) as Array<[RoleMode, (typeof roleModes)[RoleMode]]>
+              ).map(([roleKey, roleValue]) => (
+                <button
+                  key={roleKey}
+                  type="button"
+                  className={
+                    roleKey === selectedRole ? "ios-button" : "ios-button-secondary"
+                  }
+                  onClick={() => {
+                    setSelectedRole(roleKey);
+                    setShowRoleMenu(false);
+                  }}
+                >
+                  {roleValue.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
           <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-            Acceso interno
+            Acceso interno · {roleMode.label}
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[color:var(--foreground)]">
-            Identificate para entrar
+            {roleMode.title}
           </h2>
           <p className="mt-3 max-w-md text-sm leading-7 text-[color:var(--muted)]">
-            Usa tu correo y contrasena para abrir el sistema operativo de
-            LocalTracker.
+            {roleMode.description}
           </p>
         </div>
 
         <input type="hidden" name="next" value={nextPath} />
+        <input type="hidden" name="role_hint" value={selectedRole} />
 
         <div className="mt-8 grid gap-4">
           <label className="field">
@@ -113,7 +174,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
               className="field-input"
               type="email"
               name="email"
-              placeholder="equipo@localtracker.app"
+              placeholder={roleMode.emailPlaceholder}
               autoComplete="email"
               required
             />
@@ -142,6 +203,12 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
           </button>
           <span className="link-chip">Panel protegido por rol</span>
         </div>
+
+        <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+          Si quieres manejar cuentas demo separadas, crea los usuarios en
+          Supabase Auth con el rol correspondiente. Las restricciones de Owner,
+          Staff y Driver ya se aplican dentro del sistema.
+        </p>
 
         {message ? (
           <p

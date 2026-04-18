@@ -29,6 +29,7 @@ export async function SiteHeader() {
   const internalRole = internalSession?.profile.role ?? null;
   const canAccessOperations =
     internalRole === "owner" || internalRole === "staff";
+  const isDriver = internalRole === "driver";
 
   return (
     <header className="panel panel-strong sticky top-4 z-20 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -65,6 +66,11 @@ export async function SiteHeader() {
                     Repartidores
                   </Link>
                 </>
+              ) : null}
+              {isDriver ? (
+                <Link href="/driver" className="ios-button-secondary">
+                  Driver
+                </Link>
               ) : null}
               <form action={signOutInternalAction}>
                 <button type="submit" className="ios-button-ghost">
