@@ -31,7 +31,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="page-shell">
       <SiteHeader />
 
-      <section className="mx-auto mt-6 max-w-2xl">
+      <section className="mx-auto mt-6 max-w-6xl">
         <LoginForm nextPath={nextPath} initialMessage={params.message} />
       </section>
     </main>

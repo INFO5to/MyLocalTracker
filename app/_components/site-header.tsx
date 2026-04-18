@@ -74,7 +74,7 @@ export async function SiteHeader() {
             </>
           ) : (
             <Link href="/login" className="ios-button-secondary">
-              Acceso interno
+              Control principal
             </Link>
           )}
         </nav>

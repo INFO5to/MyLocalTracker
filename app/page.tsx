@@ -10,7 +10,7 @@ export default async function Home() {
       <section className="grid gap-6 pb-8 pt-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="panel panel-strong flex flex-col justify-between gap-8">
           <div className="space-y-5">
-            <span className="eyebrow">Seguimiento tipo Uber para negocios locales</span>
+            <span className="eyebrow">Seguimiento de pedidos en tiempo real</span>
             <div className="space-y-4">
               <h1 className="display-title">
                 Un solo mensaje al cliente. El resto del seguimiento vive en tu
@@ -26,7 +26,7 @@ export default async function Home() {
 
           <div className="flex flex-wrap gap-3">
             <Link href="/login" className="ios-button">
-              Entrar al panel interno
+              Entrar al control principal
             </Link>
             <span className="link-chip border-none bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
               Cliente solo ve su tracking
