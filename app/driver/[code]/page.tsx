@@ -12,6 +12,7 @@ import { DriverTrackingConsole } from "@/app/driver/_components/driver-tracking-
 import { requireInternalSession } from "@/lib/auth";
 import { buildTrackingUrl } from "@/lib/public-url";
 import {
+  getDriverHomeSnapshot,
   getInternalTrackingOrderByCode,
   getNextStatusLabel,
   getStatusMeta,
@@ -34,8 +35,20 @@ export async function generateMetadata({
 
 export default async function DriverPage({ params }: DriverPageProps) {
   const { code } = await params;
-  await requireInternalSession(["owner", "staff", "driver"], `/driver/${code}`);
-  const tracking = await getInternalTrackingOrderByCode(code);
+  const session = await requireInternalSession(
+    ["owner", "staff", "driver"],
+    `/driver/${code}`,
+  );
+  let allowedCourierId: string | null = null;
+
+  if (session.profile.role === "driver") {
+    const snapshot = await getDriverHomeSnapshot(session.profile.id);
+    allowedCourierId = snapshot.courier?.id ?? null;
+  }
+
+  const tracking = await getInternalTrackingOrderByCode(code, {
+    allowedCourierId,
+  });
 
   if (!tracking) {
     notFound();
@@ -88,8 +101,13 @@ export default async function DriverPage({ params }: DriverPageProps) {
             <Link href={`/track/${tracking.publicToken}`} className="ios-button-secondary">
               Abrir tracking publico
             </Link>
-            <Link href="/dashboard" className="ios-button-quiet">
-              Volver al dashboard
+            <Link
+              href={session.profile.role === "driver" ? "/driver" : "/dashboard"}
+              className="ios-button-quiet"
+            >
+              {session.profile.role === "driver"
+                ? "Volver a vista de repartidor"
+                : "Volver al dashboard"}
             </Link>
           </div>
         </div>

@@ -62,6 +62,22 @@ export type DashboardSnapshot = {
   trackingBaseUrl: TrackingBaseUrlInfo;
 };
 
+export type DriverProfileCard = {
+  id: string;
+  fullName: string;
+  phone: string;
+  vehicleLabel: string;
+  isActive: boolean;
+  statusLabel: string;
+};
+
+export type DriverHomeSnapshot = {
+  courier: DriverProfileCard | null;
+  activeOrders: DashboardOrder[];
+  deliveredOrders: DashboardOrder[];
+  highlights: string[];
+};
+
 export type TrackingTimelineEvent = {
   id: string;
   title: string;
@@ -317,6 +333,20 @@ function mapCourierRowToOption(row: GenericRecord): CourierOption {
   };
 }
 
+function mapCourierRowToDriverProfile(row: GenericRecord): DriverProfileCard {
+  const isActive = row.is_active !== false;
+
+  return {
+    id: typeof row.id === "string" ? row.id : crypto.randomUUID(),
+    fullName:
+      typeof row.full_name === "string" ? row.full_name : "Repartidor",
+    phone: typeof row.phone === "string" ? row.phone : "Sin telefono",
+    vehicleLabel: buildVehicleLabel(row),
+    isActive,
+    statusLabel: isActive ? "Disponible" : "En descanso",
+  };
+}
+
 function mapOrderRowToDashboardOrder(row: GenericRecord): DashboardOrder {
   const status = normalizeStatus(row.status);
   const courier = coerceRelationRecord(row.courier);
@@ -544,6 +574,85 @@ export async function getCourierRoster(): Promise<CourierOption[]> {
   }
 }
 
+export async function getDriverHomeSnapshot(
+  profileId: string,
+): Promise<DriverHomeSnapshot> {
+  const supabase = await getSupabaseServerClient();
+
+  if (!supabase) {
+    return {
+      courier: null,
+      activeOrders: [],
+      deliveredOrders: [],
+      highlights: [
+        "Supabase no esta configurado en este entorno.",
+      ],
+    };
+  }
+
+  try {
+    const { data: courierData, error: courierError } = await supabase
+      .from("couriers")
+      .select("id, full_name, phone, vehicle_type, vehicle_plate, is_active")
+      .eq("profile_id", profileId)
+      .maybeSingle();
+
+    if (courierError || !courierData) {
+      return {
+        courier: null,
+        activeOrders: [],
+        deliveredOrders: [],
+        highlights: [
+          "Tu cuenta driver aun no esta vinculada a un repartidor del roster.",
+          "Vincula esta cuenta desde la base de datos o desde el futuro modulo de usuarios internos.",
+        ],
+      };
+    }
+
+    const courier = mapCourierRowToDriverProfile(courierData as GenericRecord);
+    const { data: ordersData, error: ordersError } = await supabase
+      .from("orders")
+      .select(
+        "id, tracking_code, public_tracking_token, customer_name, delivery_address, status, eta_minutes, total_amount, updated_at, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
+      )
+      .eq("courier_id", courier.id)
+      .order("updated_at", { ascending: false })
+      .limit(36);
+
+    if (ordersError) {
+      throw ordersError;
+    }
+
+    const orders = (ordersData ?? []).map((row) =>
+      mapOrderRowToDashboardOrder(row as GenericRecord),
+    );
+
+    return {
+      courier,
+      activeOrders: orders.filter((order) => order.status !== "delivered"),
+      deliveredOrders: orders.filter((order) => order.status === "delivered"),
+      highlights: courier.isActive
+        ? [
+            "Tu panel muestra solo pedidos ligados a tu cuenta de repartidor.",
+            "Desde cada tarjeta puedes abrir la ruta interna o el tracking del cliente.",
+          ]
+        : [
+            "Tu estado actual esta en descanso. Puedes seguir revisando tus pedidos asignados.",
+            "Si vas a salir a ruta, cambia tu estado desde el modulo del negocio.",
+          ],
+    };
+  } catch {
+    return {
+      courier: null,
+      activeOrders: [],
+      deliveredOrders: [],
+      highlights: [
+        "No pude levantar la vista dedicada del repartidor en este momento.",
+      ],
+    };
+  }
+}
+
 function mapEventRowToTimelineEvent(row: GenericRecord, fallbackKey: string) {
   return {
     id:
@@ -670,6 +779,9 @@ function buildTrackingOrderFromSources(
 
 export async function getInternalTrackingOrderByCode(
   code: string,
+  options?: {
+    allowedCourierId?: string | null;
+  },
 ): Promise<PublicTrackingOrder | null> {
   const normalizedCode = code.trim().toUpperCase();
 
@@ -683,14 +795,19 @@ export async function getInternalTrackingOrderByCode(
     return null;
   }
 
+  const orderQuery = supabase
+    .from("orders")
+    .select(
+      "id, tracking_code, public_tracking_token, business_name, customer_name, status, delivery_address, eta_minutes, updated_at, is_tracking_enabled, delivery_lat, delivery_lng, items, courier_id, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
+    )
+    .eq("tracking_code", normalizedCode);
+
+  if (options?.allowedCourierId) {
+    orderQuery.eq("courier_id", options.allowedCourierId);
+  }
+
   const [orderResult, latestLocationResult, eventsResult] = await Promise.all([
-    supabase
-      .from("orders")
-      .select(
-        "id, tracking_code, public_tracking_token, business_name, customer_name, status, delivery_address, eta_minutes, updated_at, is_tracking_enabled, delivery_lat, delivery_lng, items, courier_id, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
-      )
-      .eq("tracking_code", normalizedCode)
-      .maybeSingle(),
+    orderQuery.maybeSingle(),
     supabase
       .from("courier_locations")
       .select(
