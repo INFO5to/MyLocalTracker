@@ -23,6 +23,7 @@ const roleModes = {
     description:
       "Gestiona pedidos, repartidores y toda la operacion interna desde el panel principal.",
     emailPlaceholder: "dueno@localtracker.app",
+    prefillEmail: "",
   },
   staff: {
     label: "Staff",
@@ -30,6 +31,7 @@ const roleModes = {
     description:
       "Pensado para quien confirma pedidos, mueve estados y coordina el turno.",
     emailPlaceholder: "staff@localtracker.app",
+    prefillEmail: "staff@localtracker.app",
   },
   driver: {
     label: "Driver",
@@ -37,6 +39,7 @@ const roleModes = {
     description:
       "Usa este acceso para entrar a la capa interna del repartidor y emitir ubicaciones.",
     emailPlaceholder: "driver@localtracker.app",
+    prefillEmail: "driver@localtracker.app",
   },
 } as const;
 
@@ -67,6 +70,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
   );
   const [selectedRole, setSelectedRole] = useState<RoleMode>("owner");
   const [showRoleMenu, setShowRoleMenu] = useState(false);
+  const [emailValue, setEmailValue] = useState("");
 
   const message = state.message || initialMessage || "";
   const isError = state.status === "error" || Boolean(initialMessage);
@@ -145,6 +149,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
                   }
                   onClick={() => {
                     setSelectedRole(roleKey);
+                    setEmailValue(roleValue.prefillEmail);
                     setShowRoleMenu(false);
                   }}
                 >
@@ -174,6 +179,10 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
               className="field-input"
               type="email"
               name="email"
+              value={emailValue}
+              onChange={(event) => {
+                setEmailValue(event.target.value);
+              }}
               placeholder={roleMode.emailPlaceholder}
               autoComplete="email"
               required
