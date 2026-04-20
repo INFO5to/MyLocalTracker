@@ -53,6 +53,7 @@ export function DriverTrackingConsole({
 }: DriverTrackingConsoleProps) {
   const [isTracking, setIsTracking] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [trackingLocked, setTrackingLocked] = useState(false);
   const [message, setMessage] = useState(
     trackingEnabled
       ? "El pedido ya esta marcado en ruta. Puedes empezar a emitir ubicaciones cada 5 segundos."
@@ -197,13 +198,37 @@ export function DriverTrackingConsole({
     }
 
     setIsTracking(true);
-    setMessage("Tracking continuo activo. La app enviara una ubicacion cada 5 segundos.");
+    if (currentStatus !== "delivered") {
+      setTrackingLocked(true);
+    }
+    setMessage(
+      currentStatus === "delivered"
+        ? "El pedido ya fue entregado. Solo puedes emitir una ultima senal manual si lo necesitas."
+        : "Tracking continuo activo. Desde ahora quedara bloqueado hasta que el pedido pase a Entregado.",
+    );
     await captureCurrentLocation();
 
     intervalRef.current = window.setInterval(() => {
       void captureCurrentLocation();
     }, LOCATION_INTERVAL_MS);
   }
+
+  useEffect(() => {
+    if (currentStatus !== "delivered") {
+      return;
+    }
+
+    if (isTracking) {
+      stopTracking();
+    }
+
+    if (trackingLocked) {
+      setTrackingLocked(false);
+      setMessage(
+        "El pedido ya fue entregado. El tracking continuo se cerro automaticamente.",
+      );
+    }
+  }, [currentStatus, isTracking, trackingLocked]);
 
   useEffect(() => {
     return () => {
@@ -245,39 +270,62 @@ export function DriverTrackingConsole({
         </button>
 
         {isTracking ? (
-          <button
-            type="button"
-            onClick={() => {
-              stopTracking();
-              setMessage("Tracking continuo detenido.");
-            }}
-            className="ios-button-secondary"
-          >
-            Detener tracking continuo
-          </button>
+          currentStatus === "delivered" ? (
+            <button
+              type="button"
+              onClick={() => {
+                stopTracking();
+                setTrackingLocked(false);
+                setMessage("Tracking continuo detenido despues de cerrar el pedido.");
+              }}
+              className="ios-button-secondary"
+            >
+              Detener tracking continuo
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="ios-button-secondary opacity-70"
+            >
+              Tracking bloqueado hasta entregar
+            </button>
+          )
         ) : (
           <button
             type="button"
             onClick={() => {
               void startTracking();
             }}
-            disabled={!courierId}
+            disabled={!courierId || currentStatus === "delivered"}
             className="ios-button-secondary"
           >
-            Iniciar tracking cada 5s
+            {trackingLocked ? "Tracking bloqueado" : "Iniciar tracking cada 5s"}
           </button>
         )}
 
-        <button
-          type="button"
-          onClick={() => {
-            void simulateMovement();
-          }}
-          disabled={isSending || !courierId}
-          className="ios-button-ghost"
-        >
-          Simular avance de prueba
-        </button>
+        {trackingLocked && currentStatus !== "delivered" ? (
+          <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            className="ios-button-ghost opacity-70"
+          >
+            Se cerrara solo al entregar
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              void simulateMovement();
+            }}
+            disabled={isSending || !courierId}
+            className="ios-button-ghost"
+          >
+            Simular avance de prueba
+          </button>
+        )}
       </div>
 
       <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">{message}</p>
