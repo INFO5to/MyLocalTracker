@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/app/_components/site-header";
 import { LoginForm } from "@/app/login/_components/login-form";
-import { getOptionalInternalSession } from "@/lib/auth";
+import {
+  getOptionalInternalSession,
+  resolveInternalPathForRole,
+} from "@/lib/auth";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -24,7 +27,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const nextPath = sanitizeNextPath(params.next);
 
   if (internalSession) {
-    redirect(nextPath);
+    redirect(resolveInternalPathForRole(internalSession.profile.role, nextPath));
   }
 
   return (

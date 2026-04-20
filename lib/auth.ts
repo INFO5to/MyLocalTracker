@@ -19,6 +19,33 @@ export type InternalSession = {
   profile: InternalProfile;
 };
 
+export function getDefaultPathForRole(role: InternalRole) {
+  return role === "driver" ? "/driver" : "/dashboard";
+}
+
+export function resolveInternalPathForRole(
+  role: InternalRole,
+  nextPath?: string | null,
+) {
+  const fallbackPath = getDefaultPathForRole(role);
+
+  if (!nextPath) {
+    return fallbackPath;
+  }
+
+  if (role === "driver") {
+    if (nextPath === "/dashboard" || nextPath.startsWith("/couriers")) {
+      return fallbackPath;
+    }
+  }
+
+  if ((role === "owner" || role === "staff") && nextPath === "/driver") {
+    return fallbackPath;
+  }
+
+  return nextPath;
+}
+
 function normalizeRole(value: unknown): InternalRole | null {
   if (typeof value !== "string") {
     return null;
@@ -106,7 +133,7 @@ export async function requireInternalSession(
   }
 
   if (!allowedRoles.includes(session.profile.role)) {
-    redirect("/login?message=Tu cuenta no tiene permisos para entrar aqui.");
+    redirect(getDefaultPathForRole(session.profile.role));
   }
 
   return session;

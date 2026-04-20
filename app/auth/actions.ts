@@ -1,7 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getOptionalInternalSession } from "@/lib/auth";
+import {
+  getOptionalInternalSession,
+  resolveInternalPathForRole,
+} from "@/lib/auth";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export type LoginActionState = {
@@ -19,26 +22,6 @@ function sanitizeNextPath(value: string) {
   }
 
   return value;
-}
-
-function resolveRoleAwareRedirect(nextPath: string | null, role: "owner" | "staff" | "driver") {
-  const fallbackPath = role === "driver" ? "/driver" : "/dashboard";
-
-  if (!nextPath) {
-    return fallbackPath;
-  }
-
-  if (role === "driver") {
-    if (nextPath === "/dashboard" || nextPath.startsWith("/couriers")) {
-      return fallbackPath;
-    }
-  }
-
-  if ((role === "owner" || role === "staff") && nextPath === "/driver") {
-    return fallbackPath;
-  }
-
-  return nextPath;
 }
 
 export async function signInInternalAction(
@@ -90,7 +73,7 @@ export async function signInInternalAction(
     };
   }
 
-  redirect(resolveRoleAwareRedirect(nextPath, internalSession.profile.role));
+  redirect(resolveInternalPathForRole(internalSession.profile.role, nextPath));
 }
 
 export async function signOutInternalAction() {
