@@ -64,6 +64,8 @@ Ejecutar en este orden:
 1. `supabase/migrations/20260415_phase1.sql`
 2. `supabase/migrations/20260415_phase2_tracking.sql`
 3. `supabase/migrations/20260416_phase3_auth.sql`
+4. `supabase/migrations/20260418_phase3_1_driver_link.sql`
+5. `supabase/migrations/20260420_phase3_2_notification_logs.sql`
 
 ## Documentacion completa
 

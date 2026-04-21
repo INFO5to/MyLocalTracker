@@ -48,6 +48,38 @@ function parseCoordinate(value: string) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+async function logNotificationAttempt(input: {
+  orderId: string;
+  trackingCode: string;
+  destinationPhone: string | null;
+  statusTriggered: OrderStatus;
+  channel: "whatsapp" | "sms" | null;
+  resultStatus: "sent" | "skipped" | "failed";
+  reason?: string;
+}) {
+  const supabase = await getSupabaseServerClient();
+
+  if (!supabase) {
+    return;
+  }
+
+  const { error } = await supabase.from("notification_logs").insert({
+    order_id: input.orderId,
+    tracking_code: input.trackingCode,
+    destination_phone: input.destinationPhone,
+    channel: input.channel,
+    delivery_status: input.resultStatus,
+    reason: input.reason ?? null,
+    triggered_by_status: input.statusTriggered,
+  });
+
+  if (error) {
+    console.error(
+      `[notifications] No se pudo guardar el log del aviso para ${input.trackingCode}: ${error.message}`,
+    );
+  }
+}
+
 export async function createOrderAction(
   _prevState: CreateOrderActionState,
   formData: FormData,
@@ -259,6 +291,22 @@ export async function advanceOrderStatus(formData: FormData) {
       status: nextStatus,
     });
 
+    await logNotificationAttempt({
+      orderId,
+      trackingCode:
+        typeof updatedOrder.tracking_code === "string"
+          ? updatedOrder.tracking_code
+          : trackingCode,
+      destinationPhone:
+        typeof updatedOrder.customer_phone === "string"
+          ? updatedOrder.customer_phone
+          : null,
+      statusTriggered: nextStatus,
+      channel: notificationResult.channel,
+      resultStatus: notificationResult.status,
+      reason: notificationResult.reason,
+    });
+
     if (notificationResult.status === "failed") {
       console.error(
         `[notifications] No se pudo enviar el aviso ${notificationResult.channel ?? "sin canal"} para ${trackingCode}: ${notificationResult.reason ?? "sin detalle"}`,
@@ -269,6 +317,22 @@ export async function advanceOrderStatus(formData: FormData) {
       );
     }
   } catch (notificationError) {
+    await logNotificationAttempt({
+      orderId,
+      trackingCode,
+      destinationPhone:
+        typeof updatedOrder.customer_phone === "string"
+          ? updatedOrder.customer_phone
+          : null,
+      statusTriggered: nextStatus,
+      channel: null,
+      resultStatus: "failed",
+      reason:
+        notificationError instanceof Error
+          ? notificationError.message
+          : "Error inesperado al intentar enviar la notificacion.",
+    });
+
     console.error(
       `[notifications] Error inesperado al intentar avisar al cliente de ${trackingCode}:`,
       notificationError,
