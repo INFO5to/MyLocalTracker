@@ -41,7 +41,9 @@ export type DashboardOrder = {
   id: string;
   code: string;
   publicToken: string;
+  businessName: string;
   customerName: string;
+  customerPhone: string | null;
   address: string;
   courierName: string;
   courierPhone: string;
@@ -107,6 +109,7 @@ export type PublicTrackingOrder = {
   publicToken: string;
   businessName: string;
   customerName: string;
+  customerPhone: string | null;
   status: OrderStatus;
   destination: string;
   etaLabel: string;
@@ -368,10 +371,16 @@ function mapOrderRowToDashboardOrder(row: GenericRecord): DashboardOrder {
         : typeof row.tracking_code === "string"
           ? row.tracking_code
           : crypto.randomUUID(),
+    businessName:
+      typeof row.business_name === "string"
+        ? row.business_name
+        : "LocalTracker",
     customerName:
       typeof row.customer_name === "string"
         ? row.customer_name
         : "Cliente sin nombre",
+    customerPhone:
+      typeof row.customer_phone === "string" ? row.customer_phone : null,
     address:
       typeof row.delivery_address === "string"
         ? row.delivery_address
@@ -514,7 +523,7 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
       supabase
         .from("orders")
         .select(
-          "id, tracking_code, public_tracking_token, customer_name, delivery_address, status, eta_minutes, total_amount, updated_at, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
+          "id, tracking_code, public_tracking_token, business_name, customer_name, customer_phone, delivery_address, status, eta_minutes, total_amount, updated_at, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
         )
         .order("updated_at", { ascending: false })
         .limit(24),
@@ -613,7 +622,7 @@ export async function getDriverHomeSnapshot(
     const { data: ordersData, error: ordersError } = await supabase
       .from("orders")
       .select(
-        "id, tracking_code, public_tracking_token, customer_name, delivery_address, status, eta_minutes, total_amount, updated_at, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
+        "id, tracking_code, public_tracking_token, business_name, customer_name, customer_phone, delivery_address, status, eta_minutes, total_amount, updated_at, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
       )
       .eq("courier_id", courier.id)
       .order("updated_at", { ascending: false })
@@ -723,6 +732,10 @@ function buildTrackingOrderFromSources(
       typeof orderRow.customer_name === "string"
         ? orderRow.customer_name
         : "Cliente",
+    customerPhone:
+      typeof orderRow.customer_phone === "string"
+        ? orderRow.customer_phone
+        : null,
     status: normalizeStatus(orderRow.status),
     destination:
       typeof orderRow.delivery_address === "string"
@@ -798,7 +811,7 @@ export async function getInternalTrackingOrderByCode(
   const orderQuery = supabase
     .from("orders")
     .select(
-      "id, tracking_code, public_tracking_token, business_name, customer_name, status, delivery_address, eta_minutes, updated_at, is_tracking_enabled, delivery_lat, delivery_lng, items, courier_id, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
+      "id, tracking_code, public_tracking_token, business_name, customer_name, customer_phone, status, delivery_address, eta_minutes, updated_at, is_tracking_enabled, delivery_lat, delivery_lng, items, courier_id, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
     )
     .eq("tracking_code", normalizedCode);
 
@@ -884,7 +897,7 @@ export async function getPublicTrackingOrder(
     supabase
       .from("orders")
       .select(
-        "id, tracking_code, public_tracking_token, business_name, customer_name, status, delivery_address, eta_minutes, updated_at, is_tracking_enabled, delivery_lat, delivery_lng, items, courier_id, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
+        "id, tracking_code, public_tracking_token, business_name, customer_name, customer_phone, status, delivery_address, eta_minutes, updated_at, is_tracking_enabled, delivery_lat, delivery_lng, items, courier_id, courier:couriers(full_name, phone, vehicle_type, vehicle_plate)",
       )
       .or(
         `public_tracking_token.eq.${trackingToken},tracking_code.eq.${normalizedCode}`,

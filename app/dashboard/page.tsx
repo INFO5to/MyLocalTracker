@@ -3,9 +3,12 @@ import { InstallCta } from "@/app/_components/install-cta";
 import { RealtimeRefresh } from "@/app/_components/realtime-refresh";
 import { SiteHeader } from "@/app/_components/site-header";
 import { StatusPill } from "@/app/_components/status-pill";
+import { CustomerShareActions } from "@/app/_components/customer-share-actions";
 import { advanceOrderStatus } from "@/app/dashboard/actions";
 import { CreateOrderForm } from "@/app/dashboard/_components/create-order-form";
 import { requireInternalSession } from "@/lib/auth";
+import { buildCustomerTrackingMessage, buildWhatsappDeepLink } from "@/lib/manual-share";
+import { buildTrackingUrl } from "@/lib/public-url";
 import { getDashboardSnapshot, type DashboardOrder } from "@/lib/tracking";
 
 function OrdersPanel({
@@ -41,6 +44,21 @@ function OrdersPanel({
         ) : (
           orders.map((order) => (
             <article key={order.code} className="soft-card">
+              {(() => {
+                const trackingUrl = buildTrackingUrl(order.publicToken);
+                const shareMessage = buildCustomerTrackingMessage({
+                  customerName: order.customerName,
+                  businessName: order.businessName,
+                  trackingCode: order.code,
+                  trackingUrl,
+                });
+                const whatsappUrl = buildWhatsappDeepLink({
+                  customerPhone: order.customerPhone,
+                  message: shareMessage,
+                });
+
+                return (
+                  <>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
@@ -88,6 +106,15 @@ function OrdersPanel({
                 ) : null}
                 <span className="link-chip">{order.lastUpdateLabel}</span>
               </div>
+              <CustomerShareActions
+                whatsappUrl={whatsappUrl}
+                message={shareMessage}
+                trackingUrl={trackingUrl}
+                compact
+              />
+                  </>
+                );
+              })()}
             </article>
           ))
         )}

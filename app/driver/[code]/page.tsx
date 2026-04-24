@@ -217,6 +217,9 @@ export default async function DriverPage({ params }: DriverPageProps) {
             trackingCode={tracking.code}
             trackingUrl={trackingUrl}
             trackingReady={trackingReady}
+            customerName={tracking.customerName}
+            customerPhone={tracking.customerPhone}
+            businessName={tracking.businessName}
           />
 
           <DriverTrackingConsole

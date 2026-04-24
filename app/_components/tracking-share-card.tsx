@@ -1,21 +1,39 @@
 "use client";
 
 import { useState } from "react";
+import { CustomerShareActions } from "@/app/_components/customer-share-actions";
+import { buildCustomerTrackingMessage, buildWhatsappDeepLink } from "@/lib/manual-share";
 
 type TrackingShareCardProps = {
   trackingCode: string;
   trackingUrl: string;
   trackingReady: boolean;
+  customerName: string;
+  customerPhone: string | null;
+  businessName: string;
 };
 
 export function TrackingShareCard({
   trackingCode,
   trackingUrl,
   trackingReady,
+  customerName,
+  customerPhone,
+  businessName,
 }: TrackingShareCardProps) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
     "idle",
   );
+  const message = buildCustomerTrackingMessage({
+    customerName,
+    businessName,
+    trackingCode,
+    trackingUrl,
+  });
+  const whatsappUrl = buildWhatsappDeepLink({
+    customerPhone,
+    message,
+  });
 
   async function handleCopy() {
     try {
@@ -66,6 +84,12 @@ export function TrackingShareCard({
           Abrir tracking publico
         </a>
       </div>
+
+      <CustomerShareActions
+        whatsappUrl={whatsappUrl}
+        message={message}
+        trackingUrl={trackingUrl}
+      />
 
       <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
         {copyState === "copied"
