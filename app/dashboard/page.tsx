@@ -3,8 +3,7 @@ import { InstallCta } from "@/app/_components/install-cta";
 import { RealtimeRefresh } from "@/app/_components/realtime-refresh";
 import { SiteHeader } from "@/app/_components/site-header";
 import { StatusPill } from "@/app/_components/status-pill";
-import { CustomerShareActions } from "@/app/_components/customer-share-actions";
-import { advanceOrderStatus } from "@/app/dashboard/actions";
+import { OrderActionsDrawer } from "@/app/dashboard/_components/order-actions-drawer";
 import { CreateOrderForm } from "@/app/dashboard/_components/create-order-form";
 import { requireInternalSession } from "@/lib/auth";
 import { buildCustomerTrackingMessage, buildWhatsappDeepLink } from "@/lib/manual-share";
@@ -71,7 +70,19 @@ function OrdersPanel({
                     {order.address}
                   </p>
                 </div>
-                <StatusPill status={order.status} />
+                <div className="flex items-center gap-2">
+                  <StatusPill status={order.status} />
+                  <OrderActionsDrawer
+                    orderId={order.id}
+                    trackingCode={order.code}
+                    currentStatus={order.status}
+                    nextStatusLabel={order.nextStatusLabel}
+                    lastUpdateLabel={order.lastUpdateLabel}
+                    whatsappUrl={whatsappUrl}
+                    shareMessage={shareMessage}
+                    trackingUrl={trackingUrl}
+                  />
+                </div>
               </div>
 
               <div className="mt-5 flex flex-wrap gap-3 text-sm text-[color:var(--muted)]">
@@ -80,7 +91,7 @@ function OrdersPanel({
                 <span>{order.totalLabel}</span>
               </div>
 
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="mt-5 flex w-full max-w-xs flex-col gap-3">
                 <Link href={`/track/${order.publicToken}`} className="ios-button">
                   Abrir tracking
                 </Link>
@@ -90,28 +101,7 @@ function OrdersPanel({
                 >
                   Vista repartidor
                 </Link>
-                {order.nextStatus && order.nextStatusLabel ? (
-                  <form action={advanceOrderStatus}>
-                    <input type="hidden" name="order_id" value={order.id} />
-                    <input type="hidden" name="tracking_code" value={order.code} />
-                    <input
-                      type="hidden"
-                      name="current_status"
-                      value={order.status}
-                    />
-                    <button type="submit" className="ios-button-ghost">
-                      {order.nextStatusLabel}
-                    </button>
-                  </form>
-                ) : null}
-                <span className="link-chip">{order.lastUpdateLabel}</span>
               </div>
-              <CustomerShareActions
-                whatsappUrl={whatsappUrl}
-                message={shareMessage}
-                trackingUrl={trackingUrl}
-                compact
-              />
                   </>
                 );
               })()}
