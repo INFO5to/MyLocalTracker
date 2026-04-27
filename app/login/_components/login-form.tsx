@@ -22,24 +22,30 @@ const roleModes = {
     title: "Control total del sistema",
     description:
       "Gestiona pedidos, repartidores y toda la operacion interna desde el panel principal.",
-    emailPlaceholder: "dueno@localtracker.app",
-    prefillEmail: "",
+    identifierLabel: "Correo",
+    identifierPlaceholder: "dueno@localtracker.app",
+    prefillIdentifier: "",
+    inputType: "email" as const,
   },
   staff: {
     label: "Staff",
     title: "Operacion del turno",
     description:
       "Pensado para quien confirma pedidos, mueve estados y coordina el turno.",
-    emailPlaceholder: "staff@localtracker.app",
-    prefillEmail: "staff@localtracker.app",
+    identifierLabel: "Correo",
+    identifierPlaceholder: "staff@localtracker.app",
+    prefillIdentifier: "staff@localtracker.app",
+    inputType: "email" as const,
   },
   driver: {
     label: "Driver",
     title: "Ruta y seguimiento vivo",
     description:
-      "Usa este acceso para entrar a la capa interna del repartidor y emitir ubicaciones.",
-    emailPlaceholder: "driver@localtracker.app",
-    prefillEmail: "driver@localtracker.app",
+      "Usa este acceso para entrar a tu panel de repartidor con tu ID de acceso y tu contrasena.",
+    identifierLabel: "ID de repartidor",
+    identifierPlaceholder: "DRV-001",
+    prefillIdentifier: "",
+    inputType: "text" as const,
   },
 } as const;
 
@@ -70,7 +76,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
   );
   const [selectedRole, setSelectedRole] = useState<RoleMode>("owner");
   const [showRoleMenu, setShowRoleMenu] = useState(false);
-  const [emailValue, setEmailValue] = useState("");
+  const [identifierValue, setIdentifierValue] = useState("");
 
   const message = state.message || initialMessage || "";
   const isError = state.status === "error" || Boolean(initialMessage);
@@ -105,7 +111,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
             },
             {
               title: "Driver",
-              text: "Entra a su ruta interna para emitir ubicaciones en vivo.",
+              text: "Entra a su panel propio para tomar ruta y emitir ubicaciones.",
             },
           ].map((role) => (
             <div key={role.title} className="soft-card-strong">
@@ -149,7 +155,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
                   }
                   onClick={() => {
                     setSelectedRole(roleKey);
-                    setEmailValue(roleValue.prefillEmail);
+                    setIdentifierValue(roleValue.prefillIdentifier);
                     setShowRoleMenu(false);
                   }}
                 >
@@ -159,7 +165,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
             </div>
           ) : null}
           <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-            Acceso interno · {roleMode.label}
+            Acceso interno - {roleMode.label}
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[color:var(--foreground)]">
             {roleMode.title}
@@ -174,17 +180,17 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
 
         <div className="mt-8 grid gap-4">
           <label className="field">
-            <span className="field-label">Correo</span>
+            <span className="field-label">{roleMode.identifierLabel}</span>
             <input
               className="field-input"
-              type="email"
-              name="email"
-              value={emailValue}
+              type={roleMode.inputType}
+              name="identifier"
+              value={identifierValue}
               onChange={(event) => {
-                setEmailValue(event.target.value);
+                setIdentifierValue(event.target.value);
               }}
-              placeholder={roleMode.emailPlaceholder}
-              autoComplete="email"
+              placeholder={roleMode.identifierPlaceholder}
+              autoComplete={selectedRole === "driver" ? "username" : "email"}
               required
             />
           </label>
@@ -203,20 +209,16 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            disabled={pending}
-            className="ios-button"
-          >
+          <button type="submit" disabled={pending} className="ios-button">
             {pending ? "Entrando..." : "Entrar al sistema"}
           </button>
           <span className="link-chip">Panel protegido por rol</span>
         </div>
 
         <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-          Si quieres manejar cuentas demo separadas, crea los usuarios en
-          Supabase Auth con el rol correspondiente. Las restricciones de Owner,
-          Staff y Driver ya se aplican dentro del sistema.
+          {selectedRole === "driver"
+            ? "Cada repartidor entra con su ID de acceso y su propia contrasena. El sistema resuelve internamente a quien pertenece ese panel."
+            : "Si quieres manejar cuentas demo separadas, crea los usuarios en Supabase Auth con el rol correspondiente. Las restricciones de Owner, Staff y Driver ya se aplican dentro del sistema."}
         </p>
 
         {message ? (

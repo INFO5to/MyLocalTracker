@@ -127,6 +127,17 @@ export function CourierManagementPanel({
             </label>
 
             <label className="field">
+              <span className="field-label">ID de acceso</span>
+              <input
+                className="field-input"
+                type="text"
+                name="driver_login_id"
+                placeholder="DRV-001"
+                required
+              />
+            </label>
+
+            <label className="field">
               <span className="field-label">Telefono</span>
               <input
                 className="field-input"
@@ -191,14 +202,15 @@ export function CourierManagementPanel({
         </p>
 
         <div className="soft-card-strong mt-6 hidden xl:block">
-          <div
-            className="grid items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]"
-            style={{
-              gridTemplateColumns:
-                "1.25fr 1fr 0.75fr 0.75fr 0.9fr 0.7fr 0.55fr",
-            }}
-          >
+            <div
+              className="grid items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]"
+              style={{
+                gridTemplateColumns:
+                  "1.05fr 0.8fr 1fr 0.75fr 0.75fr 0.9fr 0.7fr 0.55fr",
+              }}
+            >
             <span>Repartidor</span>
+            <span>ID acceso</span>
             <span>Telefono</span>
             <span>Vehiculo</span>
             <span>Placa</span>
@@ -231,12 +243,16 @@ export function CourierManagementPanel({
                       className="hidden xl:grid xl:items-center xl:gap-4"
                       style={{
                         gridTemplateColumns:
-                          "1.25fr 1fr 0.75fr 0.75fr 0.9fr 0.7fr 0.55fr",
+                          "1.05fr 0.8fr 1fr 0.75fr 0.75fr 0.9fr 0.7fr 0.55fr",
                       }}
                     >
                       <CourierDetailCell
                         label="Repartidor"
                         value={courier.fullName}
+                      />
+                      <CourierDetailCell
+                        label="ID acceso"
+                        value={courier.driverLoginId}
                       />
                       <CourierDetailCell label="Telefono" value={courier.phone} />
                       <CourierDetailCell
@@ -275,6 +291,10 @@ export function CourierManagementPanel({
                       </div>
 
                       <div className="grid gap-3 sm:grid-cols-2">
+                        <CourierDetailCell
+                          label="ID acceso"
+                          value={courier.driverLoginId}
+                        />
                         <CourierDetailCell label="Telefono" value={courier.phone} />
                         <CourierDetailCell
                           label="Vehiculo"
@@ -325,6 +345,18 @@ export function CourierManagementPanel({
                           courier.phone === "Sin telefono" ? "" : courier.phone
                         }
                         placeholder="+52 55 1234 5678"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span className="field-label">ID de acceso</span>
+                      <input
+                        className="field-input"
+                        type="text"
+                        name="driver_login_id"
+                        defaultValue={courier.driverLoginId}
+                        placeholder="DRV-001"
+                        required
                       />
                     </label>
 

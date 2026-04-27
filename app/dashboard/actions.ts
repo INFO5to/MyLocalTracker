@@ -2,6 +2,7 @@
 
 import { refresh, revalidatePath } from "next/cache";
 import { requireInternalActionAccess } from "@/lib/auth";
+import { normalizeDriverLoginId } from "@/lib/driver-login";
 import { notifyCustomerOrderStatus } from "@/lib/notifications";
 import { normalizeMexicanWhatsappPhone } from "@/lib/phone";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -363,17 +364,23 @@ export async function saveCourierAction(formData: FormData) {
 
   const courierId = asString(formData.get("courier_id"));
   const fullName = asString(formData.get("full_name"));
+  const driverLoginId = normalizeDriverLoginId(
+    asString(formData.get("driver_login_id")),
+  );
   const phone = asString(formData.get("phone"));
   const vehicleType = asString(formData.get("vehicle_type"));
   const vehiclePlate = asString(formData.get("vehicle_plate"));
   const isActive = parseBooleanFlag(asString(formData.get("is_active")));
 
-  if (!fullName) {
-    throw new Error("El nombre del repartidor es obligatorio.");
+  if (!fullName || !driverLoginId) {
+    throw new Error(
+      "El nombre y el ID de acceso del repartidor son obligatorios.",
+    );
   }
 
   const payload = {
     full_name: fullName,
+    driver_login_id: driverLoginId,
     phone: phone || null,
     vehicle_type: vehicleType || null,
     vehicle_plate: vehiclePlate || null,

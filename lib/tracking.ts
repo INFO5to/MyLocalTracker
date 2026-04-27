@@ -22,6 +22,7 @@ type StatusMeta = {
 export type CourierOption = {
   id: string;
   fullName: string;
+  driverLoginId: string;
   phone: string;
   vehicleType: string;
   vehiclePlate: string;
@@ -326,6 +327,10 @@ function mapCourierRowToOption(row: GenericRecord): CourierOption {
     id: typeof row.id === "string" ? row.id : crypto.randomUUID(),
     fullName:
       typeof row.full_name === "string" ? row.full_name : "Repartidor",
+    driverLoginId:
+      typeof row.driver_login_id === "string" && row.driver_login_id.length > 0
+        ? row.driver_login_id
+        : "SIN-ID",
     phone: typeof row.phone === "string" ? row.phone : "Sin telefono",
     vehicleType,
     vehiclePlate,
@@ -530,7 +535,7 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
       supabase
         .from("couriers")
         .select(
-          "id, full_name, phone, vehicle_type, vehicle_plate, is_active, updated_at",
+          "id, full_name, driver_login_id, phone, vehicle_type, vehicle_plate, is_active, updated_at",
         )
         .order("full_name", { ascending: true }),
     ]);
@@ -567,7 +572,7 @@ export async function getCourierRoster(): Promise<CourierOption[]> {
     const { data, error } = await supabase
       .from("couriers")
       .select(
-        "id, full_name, phone, vehicle_type, vehicle_plate, is_active, updated_at",
+        "id, full_name, driver_login_id, phone, vehicle_type, vehicle_plate, is_active, updated_at",
       )
       .order("full_name", { ascending: true });
 

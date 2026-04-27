@@ -5,6 +5,7 @@ import {
   getOptionalInternalSession,
   resolveInternalPathForRole,
 } from "@/lib/auth";
+import { normalizeDriverLoginId } from "@/lib/driver-login";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export type LoginActionState = {
@@ -37,16 +38,56 @@ export async function signInInternalAction(
     };
   }
 
-  const email = asString(formData.get("email")).toLowerCase();
+  const roleHint = asString(formData.get("role_hint")).toLowerCase();
+  const identifier = asString(formData.get("identifier"));
   const password = asString(formData.get("password"));
   const nextPathInput = asString(formData.get("next"));
   const nextPath = nextPathInput ? sanitizeNextPath(nextPathInput) : null;
 
-  if (!email || !password) {
+  if (!identifier || !password) {
     return {
       status: "error",
-      message: "Correo y contrasena son obligatorios.",
+      message:
+        roleHint === "driver"
+          ? "ID de repartidor y contrasena son obligatorios."
+          : "Correo y contrasena son obligatorios.",
     };
+  }
+
+  let email = identifier.toLowerCase();
+
+  if (roleHint === "driver") {
+    const normalizedDriverLoginId = normalizeDriverLoginId(identifier);
+    const { data: resolvedDriver, error: resolveError } = await supabase
+      .rpc("resolve_driver_login", {
+        login_id: normalizedDriverLoginId,
+      })
+      .maybeSingle();
+
+    if (resolveError) {
+      return {
+        status: "error",
+        message: "No pude resolver el ID del repartidor en este momento.",
+      };
+    }
+
+    const resolvedEmail =
+      resolvedDriver &&
+      typeof resolvedDriver === "object" &&
+      "email" in resolvedDriver &&
+      typeof resolvedDriver.email === "string"
+        ? resolvedDriver.email
+        : "";
+
+    if (!resolvedEmail) {
+      return {
+        status: "error",
+        message:
+          "No encontramos un repartidor enlazado con ese ID de acceso.",
+      };
+    }
+
+    email = resolvedEmail.toLowerCase();
   }
 
   const { error } = await supabase.auth.signInWithPassword({
