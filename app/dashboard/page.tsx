@@ -2,222 +2,22 @@ import Link from "next/link";
 import { InstallCta } from "@/app/_components/install-cta";
 import { RealtimeRefresh } from "@/app/_components/realtime-refresh";
 import { SiteHeader } from "@/app/_components/site-header";
-import { StatusPill } from "@/app/_components/status-pill";
-import { OrderActionsDrawer } from "@/app/dashboard/_components/order-actions-drawer";
 import { CreateOrderForm } from "@/app/dashboard/_components/create-order-form";
+import { OrderSummaryCard } from "@/app/dashboard/_components/order-summary-card";
 import { requireInternalSession } from "@/lib/auth";
-import { buildCustomerTrackingMessage, buildWhatsappDeepLink } from "@/lib/manual-share";
-import { buildTrackingUrl } from "@/lib/public-url";
 import { getDashboardSnapshot, type DashboardOrder } from "@/lib/tracking";
-
-function StopwatchIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 64 64"
-      className="h-16 w-16"
-      fill="none"
-    >
-      <path
-        d="M24 7h16M32 7v8M50 13l5 5M51 19l-4 4"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M32 57c12.7 0 23-10.3 23-23S44.7 11 32 11 9 21.3 9 34s10.3 23 23 23Z"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        d="M13 34a19 19 0 0 1 19-19"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M32 24v10h12"
-        stroke="currentColor"
-        strokeWidth="4.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M19 34h-4M49 34h-4M32 17v4M32 47v4M44 22l-3 3M23 43l-3 3"
-        stroke="currentColor"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function OrderCard({ order, compact = false }: { order: DashboardOrder; compact?: boolean }) {
-  const trackingUrl = buildTrackingUrl(order.publicToken);
-  const shareMessage = buildCustomerTrackingMessage({
-    customerName: order.customerName,
-    businessName: order.businessName,
-    trackingCode: order.code,
-    trackingUrl,
-  });
-  const whatsappUrl = buildWhatsappDeepLink({
-    customerPhone: order.customerPhone,
-    message: shareMessage,
-  });
-
-  if (compact) {
-    return (
-      <article className="history-order-row">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-              {order.code}
-            </p>
-            <StatusPill status={order.status} />
-          </div>
-          <h3 className="mt-2 text-lg font-semibold">{order.customerName}</h3>
-          <p className="mt-1 text-sm text-[color:var(--muted)]">{order.address}</p>
-          <div className="mt-3 flex flex-wrap gap-3 text-xs uppercase tracking-[0.14em] text-[color:var(--muted)]">
-            <span>{order.courierName}</span>
-            <span>{order.totalLabel}</span>
-            <span>{order.lastUpdateLabel}</span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 md:justify-end">
-          <Link href={`/track/${order.publicToken}`} className="link-chip">
-            Tracking
-          </Link>
-          <Link href={`/driver/${order.code}`} className="link-chip">
-            Repartidor
-          </Link>
-          <OrderActionsDrawer
-            orderId={order.id}
-            trackingCode={order.code}
-            currentStatus={order.status}
-            nextStatusLabel={order.nextStatusLabel}
-            lastUpdateLabel={order.lastUpdateLabel}
-            whatsappUrl={whatsappUrl}
-            shareMessage={shareMessage}
-            trackingUrl={trackingUrl}
-          />
-        </div>
-      </article>
-    );
-  }
-
-  return (
-    <article className="soft-card">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-            {order.code}
-          </p>
-          <h3 className="mt-2 text-xl font-semibold">
-            {order.customerName}
-          </h3>
-          <p className="mt-2 text-sm text-[color:var(--muted)]">
-            {order.address}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <StatusPill status={order.status} />
-          <OrderActionsDrawer
-            orderId={order.id}
-            trackingCode={order.code}
-            currentStatus={order.status}
-            nextStatusLabel={order.nextStatusLabel}
-            lastUpdateLabel={order.lastUpdateLabel}
-            whatsappUrl={whatsappUrl}
-            shareMessage={shareMessage}
-            trackingUrl={trackingUrl}
-          />
-        </div>
-      </div>
-
-      <div className="mt-5 flex flex-wrap gap-3 text-sm text-[color:var(--muted)]">
-        <span>Repartidor: {order.courierName}</span>
-        <span>{order.etaLabel}</span>
-        <span>{order.totalLabel}</span>
-      </div>
-
-      <div className="mt-5 flex w-full max-w-xs flex-col gap-3">
-        <Link href={`/track/${order.publicToken}`} className="ios-button">
-          Abrir tracking
-        </Link>
-        <Link
-          href={`/driver/${order.code}`}
-          className="ios-button-secondary"
-        >
-          Vista repartidor
-        </Link>
-      </div>
-    </article>
-  );
-}
 
 function OrdersPanel({
   title,
   eyebrow,
   description,
   orders,
-  collapsible = false,
 }: {
   title: string;
   eyebrow: string;
   description: string;
   orders: DashboardOrder[];
-  collapsible?: boolean;
 }) {
-  const ordersContent = (
-    <div className={collapsible ? "history-orders-list" : "mt-6 space-y-4"}>
-      {orders.length === 0 ? (
-        <div className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]">
-          Todavia no hay pedidos en esta seccion.
-        </div>
-      ) : (
-        orders.map((order) => (
-          <OrderCard key={order.code} order={order} compact={collapsible} />
-        ))
-      )}
-    </div>
-  );
-
-  if (collapsible) {
-    return (
-      <article className="panel history-panel">
-        <details className="history-fold">
-          <summary className="history-launcher">
-            <span className="history-launch-button" aria-hidden="true">
-              <span className="history-launch-button__icon">
-                <StopwatchIcon />
-              </span>
-              <span className="history-launch-button__title">Historial</span>
-            </span>
-
-            <span className="min-w-0">
-              <span className="eyebrow">{eyebrow}</span>
-              <span className="section-title mt-4 block">{title}</span>
-              <span className="mt-3 block max-w-xl text-sm leading-7 text-[color:var(--muted)]">
-                {description}
-              </span>
-            </span>
-
-            <span className="flex flex-wrap items-center gap-3 md:justify-end">
-              <span className="link-chip">{orders.length} registros</span>
-              <span className="ios-button-secondary history-toggle-label">
-                Ver historico
-              </span>
-            </span>
-          </summary>
-
-          {ordersContent}
-        </details>
-      </article>
-    );
-  }
-
   return (
     <article className="panel">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -232,7 +32,17 @@ function OrdersPanel({
         {description}
       </p>
 
-      {ordersContent}
+      <div className="mt-6 space-y-4">
+        {orders.length === 0 ? (
+          <div className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]">
+            Todavia no hay pedidos en esta seccion.
+          </div>
+        ) : (
+          orders.map((order) => (
+            <OrderSummaryCard key={order.code} order={order} />
+          ))
+        )}
+      </div>
     </article>
   );
 }
@@ -299,23 +109,17 @@ export default async function DashboardPage() {
       <section className="mt-6">
         <CreateOrderForm
           couriers={dashboard.couriers.filter((courier) => courier.isActive)}
+          historyHref="/dashboard/history"
+          historyCount={deliveredOrders.length}
         />
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+      <section className="mt-6">
         <OrdersPanel
           eyebrow="Pedidos activos"
           title="Turno en movimiento"
           description="Aqui quedan los pedidos que todavia estan en operacion: pendientes, confirmados, preparando, listos o en camino."
           orders={activeOrders}
-        />
-
-        <OrdersPanel
-          eyebrow="Pedidos entregados"
-          title="Historico del turno"
-          description="Este lado se reserva para lo ya entregado, asi puedes cerrar visualmente el turno sin mezclarlo con lo que sigue vivo."
-          orders={deliveredOrders}
-          collapsible
         />
       </section>
 

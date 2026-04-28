@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import {
   createOrderAction,
@@ -10,6 +11,8 @@ import type { CourierOption } from "@/lib/tracking";
 
 type CreateOrderFormProps = {
   couriers: CourierOption[];
+  historyHref: string;
+  historyCount: number;
 };
 
 const initialState: CreateOrderActionState = {
@@ -56,7 +59,54 @@ function ClipboardCheckIcon() {
   );
 }
 
-export function CreateOrderForm({ couriers }: CreateOrderFormProps) {
+function StopwatchIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      className="h-16 w-16"
+      fill="none"
+    >
+      <path
+        d="M24 7h16M32 7v8M50 13l5 5M51 19l-4 4"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M32 57c12.7 0 23-10.3 23-23S44.7 11 32 11 9 21.3 9 34s10.3 23 23 23Z"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        d="M13 34a19 19 0 0 1 19-19"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M32 24v10h12"
+        stroke="currentColor"
+        strokeWidth="4.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M19 34h-4M49 34h-4M32 17v4M32 47v4M44 22l-3 3M23 43l-3 3"
+        stroke="currentColor"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function CreateOrderForm({
+  couriers,
+  historyHref,
+  historyCount,
+}: CreateOrderFormProps) {
   const [state, formAction, pending] = useActionState(createOrderAction, initialState);
   const [customerPhone, setCustomerPhone] = useState("+521 ");
   const [isOpen, setIsOpen] = useState(false);
@@ -65,25 +115,35 @@ export function CreateOrderForm({ couriers }: CreateOrderFormProps) {
   return (
     <section className="panel panel-strong new-order-shell">
       <div className="new-order-launcher">
-        <button
-          type="button"
-          className="order-launch-button"
-          aria-expanded={isOpen}
-          aria-controls="new-order-form-panel"
-          onClick={() => setIsOpen((current) => !current)}
-        >
-          <span className="order-launch-button__icon">
-            <ClipboardCheckIcon />
-          </span>
-          <span className="order-launch-button__title">Pedidos</span>
-        </button>
+        <div className="new-order-actions">
+          <button
+            type="button"
+            className="order-launch-button"
+            aria-expanded={isOpen}
+            aria-controls="new-order-form-panel"
+            onClick={() => setIsOpen((current) => !current)}
+          >
+            <span className="order-launch-button__icon">
+              <ClipboardCheckIcon />
+            </span>
+            <span className="order-launch-button__title">Pedidos</span>
+          </button>
+
+          <Link href={historyHref} className="history-launch-button">
+            <span className="history-launch-button__icon">
+              <StopwatchIcon />
+            </span>
+            <span className="history-launch-button__title">Historial</span>
+            <span className="launch-count-pill">{historyCount} entregados</span>
+          </Link>
+        </div>
 
         <div className="min-w-0">
           <span className="eyebrow">Nuevo pedido</span>
-          <h2 className="section-title mt-4">Crear pedido desde el panel</h2>
+          <h2 className="section-title mt-4">Acciones rapidas del turno</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-            Mantuvimos el tablero limpio: toca el boton de Pedidos cuando quieras
-            capturar una orden nueva y vuelve a cerrarlo cuando termines.
+            Crea una orden desde Pedidos o revisa el Historial en una pantalla
+            separada. Asi el tablero principal se queda libre para lo que sigue vivo.
           </p>
         </div>
 
