@@ -1,8 +1,18 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { InstallCta } from "@/app/_components/install-cta";
 import { SiteHeader } from "@/app/_components/site-header";
+import { getDashboardSnapshot, getStatusMeta } from "@/lib/tracking";
 
 export default async function Home() {
+  const dashboard = await getDashboardSnapshot();
+  const orders = dashboard.orders;
+  const inRouteOrders = orders.filter((order) => order.status === "on_the_way");
+  const activeOrders = orders.filter((order) => order.status !== "delivered");
+  const previewOrders = orders.slice(0, 3);
+  const activePercent =
+    orders.length > 0 ? Math.round((activeOrders.length / orders.length) * 100) : 0;
+
   return (
     <main className="page-shell">
       <SiteHeader />
@@ -63,11 +73,11 @@ export default async function Home() {
               <div className="home-preview-metrics">
                 <div className="home-preview-metric home-preview-metric--brand">
                   <span>Total pedidos</span>
-                  <strong>28</strong>
+                  <strong>{orders.length}</strong>
                 </div>
                 <div className="home-preview-metric home-preview-metric--accent">
                   <span>En ruta</span>
-                  <strong>06</strong>
+                  <strong>{inRouteOrders.length}</strong>
                 </div>
               </div>
 
@@ -78,24 +88,31 @@ export default async function Home() {
                   <span className="home-chart-point" />
                 </div>
                 <div className="home-donut-card">
-                  <span className="home-donut" />
-                  <strong>78%</strong>
-                  <small>rutas activas</small>
+                  <span
+                    className="home-donut"
+                    style={{ "--home-donut-value": `${activePercent}%` } as CSSProperties}
+                  />
+                  <strong>{activePercent}%</strong>
+                  <small>operacion activa</small>
                 </div>
               </div>
 
               <div className="home-preview-table">
-                {[
-                  ["LT-42A9", "Mariana", "En camino"],
-                  ["LT-90F1", "Joahan", "Preparando"],
-                  ["LT-77C2", "Irene", "Entregado"],
-                ].map(([code, name, status]) => (
-                  <div key={code} className="home-preview-row">
-                    <span>{code}</span>
-                    <strong>{name}</strong>
-                    <em>{status}</em>
+                {previewOrders.length === 0 ? (
+                  <div className="home-preview-row">
+                    <span>LT-0000</span>
+                    <strong>Sin pedidos</strong>
+                    <em>Esperando</em>
                   </div>
-                ))}
+                ) : (
+                  previewOrders.map((order) => (
+                    <div key={order.code} className="home-preview-row">
+                      <span>{order.code}</span>
+                      <strong>{order.customerName}</strong>
+                      <em>{getStatusMeta(order.status).label}</em>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

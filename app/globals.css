@@ -551,7 +551,7 @@ select {
     border-radius: 9999px;
     background:
       radial-gradient(circle at center, color-mix(in srgb, var(--panel-strong) 98%, transparent 2%) 0 48%, transparent 49%),
-      conic-gradient(var(--brand) 0 78%, color-mix(in srgb, var(--accent) 34%, transparent 66%) 78% 100%);
+      conic-gradient(var(--brand) 0 var(--home-donut-value, 78%), color-mix(in srgb, var(--accent) 34%, transparent 66%) var(--home-donut-value, 78%) 100%);
     box-shadow: 0 0 30px color-mix(in srgb, var(--brand) 24%, transparent 76%);
     animation: home-donut-spin 8s linear infinite;
   }
