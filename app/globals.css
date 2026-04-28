@@ -418,6 +418,77 @@ select {
     filter: none;
   }
 
+  .new-order-shell {
+    overflow: hidden;
+  }
+
+  .new-order-launcher {
+    @apply grid items-center gap-6 md:grid-cols-[auto_1fr_auto];
+  }
+
+  .order-launch-button {
+    @apply inline-flex w-full flex-col items-center justify-center gap-3 rounded-[2rem] border p-4 text-center transition duration-300 sm:w-auto;
+    min-height: 188px;
+    min-width: 188px;
+    color: var(--brand-deep);
+    border-color: color-mix(in srgb, var(--brand) 22%, var(--border) 78%);
+    background:
+      radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.66), transparent 38%),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--panel-strong) 82%, white 18%) 0%,
+        color-mix(in srgb, var(--brand) 12%, var(--panel-strong) 88%) 100%
+      );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.68),
+      0 26px 60px -36px var(--shadow-strong);
+  }
+
+  .order-launch-button:hover {
+    transform: translateY(-2px) scale(1.01);
+    border-color: color-mix(in srgb, var(--brand) 42%, var(--border) 58%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      0 30px 70px -34px var(--glow);
+  }
+
+  .order-launch-button[aria-expanded="true"] {
+    color: white;
+    border-color: color-mix(in srgb, var(--brand-strong) 72%, white 28%);
+    background:
+      radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.32), transparent 36%),
+      linear-gradient(180deg, var(--brand) 0%, var(--brand-strong) 100%);
+  }
+
+  .order-launch-button__icon {
+    @apply flex items-center justify-center rounded-full;
+    width: 128px;
+    height: 128px;
+    background:
+      radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.62), transparent 34%),
+      color-mix(in srgb, var(--accent) 22%, var(--panel-strong) 78%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.62),
+      0 18px 34px -26px var(--shadow);
+  }
+
+  .order-launch-button__title {
+    font-family: var(--font-display), serif;
+    font-size: clamp(1.55rem, 3vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .new-order-form-panel {
+    @apply mt-6 border-t pt-6;
+    border-color: var(--border);
+  }
+
+  .new-order-form-panel[hidden] {
+    display: none;
+  }
+
   .theme-toggle {
     @apply relative inline-flex items-center rounded-full border p-1 transition duration-200;
     width: 108px;
