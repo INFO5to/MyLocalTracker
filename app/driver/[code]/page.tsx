@@ -60,7 +60,7 @@ export default async function DriverPage({ params }: DriverPageProps) {
     tracking.status === "on_the_way" || tracking.status === "delivered";
 
   return (
-    <main className="page-shell">
+    <main className="page-shell dashboard-shell">
       <SiteHeader />
       <RealtimeRefresh
         channelName={`driver-${tracking.code}`}

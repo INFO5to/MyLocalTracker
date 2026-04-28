@@ -55,7 +55,7 @@ export default async function DashboardPage() {
   const deliveredOrders = dashboard.orders.filter((order) => order.status === "delivered");
 
   return (
-    <main className="page-shell">
+    <main className="page-shell dashboard-shell">
       <SiteHeader />
       <RealtimeRefresh
         channelName="dashboard-orders"

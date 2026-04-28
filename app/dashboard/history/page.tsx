@@ -17,7 +17,7 @@ export default async function DashboardHistoryPage() {
   ).size;
 
   return (
-    <main className="page-shell">
+    <main className="page-shell dashboard-shell">
       <SiteHeader />
       <RealtimeRefresh
         channelName="dashboard-history-orders"

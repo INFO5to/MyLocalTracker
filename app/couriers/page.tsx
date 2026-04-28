@@ -11,7 +11,7 @@ export default async function CouriersPage() {
   const restingCouriers = couriers.filter((courier) => !courier.isActive);
 
   return (
-    <main className="page-shell">
+    <main className="page-shell dashboard-shell">
       <SiteHeader />
       <RealtimeRefresh channelName="courier-roster" targets={[{ table: "couriers" }]} />
 

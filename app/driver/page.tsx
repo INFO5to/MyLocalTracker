@@ -23,7 +23,7 @@ export default async function DriverHomePage() {
   ).length;
 
   return (
-    <main className="page-shell">
+    <main className="page-shell dashboard-shell">
       <SiteHeader />
       {courier ? (
         <RealtimeRefresh

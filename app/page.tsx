@@ -8,27 +8,29 @@ export default async function Home() {
       <SiteHeader />
 
       <section className="grid gap-6 pb-8 pt-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="panel panel-strong flex flex-col justify-between gap-8">
+        <div className="public-hero-panel flex flex-col justify-between gap-8">
           <div className="space-y-5">
             <span className="eyebrow">Seguimiento de pedidos en tiempo real</span>
             <div className="space-y-4">
               <h1 className="display-title">
-                Un solo mensaje al cliente. El resto del seguimiento vive en tu
-                mapa en tiempo real.
+                Una app limpia para operar entregas, rutas y clientes en vivo.
               </h1>
               <p className="max-w-2xl text-base leading-7 text-[color:var(--muted)] sm:text-lg">
-                LocalTracker separa las vistas correctamente: el negocio opera en
-                un panel interno protegido, el repartidor actualiza la ruta y el
-                cliente solo entra a su pedido con un enlace privado.
+                LocalTracker separa cada experiencia: el negocio opera en un
+                panel interno, el repartidor actualiza ubicacion y el cliente ve
+                un mapa privado sin entrar al sistema.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link href="/login" className="ios-button">
+            <Link href="/login" className="home-primary-button">
               Entrar al control principal
             </Link>
-            <span className="link-chip border-none bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
+            <Link href="/login" className="home-secondary-button">
+              Acceso repartidor
+            </Link>
+            <span className="home-secondary-button border-none bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
               Cliente solo ve su tracking
             </span>
           </div>
@@ -75,6 +77,23 @@ export default async function Home() {
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="grid gap-4 py-4 sm:grid-cols-3">
+        {[
+          ["Pedidos", "Estados, ETA y links listos para compartir."],
+          ["Ruta", "El mapa se actualiza con la ubicacion del repartidor."],
+          ["Cliente", "Una vista privada, clara y sin ruido operativo."],
+        ].map(([title, text]) => (
+          <article key={title} className="home-preview-card">
+            <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--brand-deep)]">
+              {title}
+            </p>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+              {text}
+            </p>
+          </article>
+        ))}
       </section>
 
       <section className="grid gap-6 py-8 lg:grid-cols-[1fr_1fr]">
