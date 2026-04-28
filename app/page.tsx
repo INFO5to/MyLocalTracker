@@ -7,8 +7,11 @@ export default async function Home() {
     <main className="page-shell">
       <SiteHeader />
 
-      <section className="grid gap-6 pb-8 pt-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="public-hero-panel flex flex-col justify-between gap-8">
+      <section className="home-hero-stage pb-8 pt-6">
+        <div className="public-hero-panel home-hero-copy">
+          <span className="home-orb home-orb--coral" aria-hidden="true" />
+          <span className="home-orb home-orb--violet" aria-hidden="true" />
+
           <div className="space-y-5">
             <span className="eyebrow">Seguimiento de pedidos en tiempo real</span>
             <div className="space-y-4">
@@ -36,19 +39,68 @@ export default async function Home() {
           </div>
         </div>
 
-        <div className="panel flex flex-col gap-5">
-          <div className="flex items-start justify-between gap-4">
+        <div className="home-dashboard-preview">
+          <div className="home-preview-topbar">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">
-                Vistas separadas
-              </p>
-              <h2 className="section-title mt-2">
-                Cada actor entra donde le toca.
-              </h2>
+              <span className="home-preview-dot" />
+              <span className="home-preview-dot home-preview-dot--violet" />
+              <span className="home-preview-dot home-preview-dot--mint" />
+            </div>
+            <span className="home-preview-search">Buscar pedido, ruta o cliente</span>
+          </div>
+
+          <div className="home-preview-layout">
+            <aside className="home-preview-sidebar">
+              <span className="home-preview-sidebar__logo">LT</span>
+              {["Pedidos", "Rutas", "Staff", "Ajustes"].map((item) => (
+                <span key={item} className="home-preview-menu-pill">
+                  {item}
+                </span>
+              ))}
+            </aside>
+
+            <div className="home-preview-content">
+              <div className="home-preview-metrics">
+                <div className="home-preview-metric home-preview-metric--brand">
+                  <span>Total pedidos</span>
+                  <strong>28</strong>
+                </div>
+                <div className="home-preview-metric home-preview-metric--accent">
+                  <span>En ruta</span>
+                  <strong>06</strong>
+                </div>
+              </div>
+
+              <div className="home-preview-analytics">
+                <div className="home-line-chart" aria-hidden="true">
+                  <span className="home-chart-line home-chart-line--one" />
+                  <span className="home-chart-line home-chart-line--two" />
+                  <span className="home-chart-point" />
+                </div>
+                <div className="home-donut-card">
+                  <span className="home-donut" />
+                  <strong>78%</strong>
+                  <small>rutas activas</small>
+                </div>
+              </div>
+
+              <div className="home-preview-table">
+                {[
+                  ["LT-42A9", "Mariana", "En camino"],
+                  ["LT-90F1", "Joahan", "Preparando"],
+                  ["LT-77C2", "Irene", "Entregado"],
+                ].map(([code, name, status]) => (
+                  <div key={code} className="home-preview-row">
+                    <span>{code}</span>
+                    <strong>{name}</strong>
+                    <em>{status}</em>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="grid gap-3">
+          <div className="home-actor-stack">
             {[
               {
                 title: "Negocio",
@@ -65,7 +117,7 @@ export default async function Home() {
             ].map((item) => (
               <div
                 key={item.title}
-                className="soft-card-strong"
+                className="home-role-card"
               >
                 <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--brand-deep)]">
                   {item.title}
