@@ -7,11 +7,28 @@ import { getDashboardSnapshot, getStatusMeta } from "@/lib/tracking";
 export default async function Home() {
   const dashboard = await getDashboardSnapshot();
   const orders = dashboard.orders;
-  const inRouteOrders = orders.filter((order) => order.status === "on_the_way");
   const activeOrders = orders.filter((order) => order.status !== "delivered");
-  const previewOrders = orders.slice(0, 3);
-  const activePercent =
-    orders.length > 0 ? Math.round((activeOrders.length / orders.length) * 100) : 0;
+  const inRouteOrders = activeOrders.filter((order) => order.status === "on_the_way");
+  const previewOrders = activeOrders.slice(0, 3);
+  const activeStatusBuckets = ([
+    "pending",
+    "confirmed",
+    "preparing",
+    "ready",
+    "on_the_way",
+  ] as const).map((status) => ({
+    status,
+    label: getStatusMeta(status).label,
+    count: activeOrders.filter((order) => order.status === status).length,
+  }));
+  const maxActiveStatusCount = Math.max(
+    1,
+    ...activeStatusBuckets.map((bucket) => bucket.count),
+  );
+  const routePercent =
+    activeOrders.length > 0
+      ? Math.round((inRouteOrders.length / activeOrders.length) * 100)
+      : 0;
 
   return (
     <main className="page-shell">
@@ -72,8 +89,8 @@ export default async function Home() {
             <div className="home-preview-content">
               <div className="home-preview-metrics">
                 <div className="home-preview-metric home-preview-metric--brand">
-                  <span>Total pedidos</span>
-                  <strong>{orders.length}</strong>
+                  <span>Pedidos activos</span>
+                  <strong>{activeOrders.length}</strong>
                 </div>
                 <div className="home-preview-metric home-preview-metric--accent">
                   <span>En ruta</span>
@@ -82,18 +99,39 @@ export default async function Home() {
               </div>
 
               <div className="home-preview-analytics">
-                <div className="home-line-chart" aria-hidden="true">
-                  <span className="home-chart-line home-chart-line--one" />
-                  <span className="home-chart-line home-chart-line--two" />
-                  <span className="home-chart-point" />
+                <div className="home-status-chart" aria-label="Estados activos del turno">
+                  {activeStatusBuckets.map((bucket) => (
+                    <div key={bucket.status} className="home-status-row">
+                      <span>{bucket.label}</span>
+                      <div className="home-status-track">
+                        <span
+                          className="home-status-bar"
+                          style={
+                            {
+                              "--status-width":
+                                bucket.count > 0
+                                  ? `${Math.max(
+                                      10,
+                                      Math.round(
+                                        (bucket.count / maxActiveStatusCount) * 100,
+                                      ),
+                                    )}%`
+                                  : "0%",
+                            } as CSSProperties
+                          }
+                        />
+                      </div>
+                      <strong>{bucket.count}</strong>
+                    </div>
+                  ))}
                 </div>
                 <div className="home-donut-card">
                   <span
                     className="home-donut"
-                    style={{ "--home-donut-value": `${activePercent}%` } as CSSProperties}
+                    style={{ "--home-donut-value": `${routePercent}%` } as CSSProperties}
                   />
-                  <strong>{activePercent}%</strong>
-                  <small>operacion activa</small>
+                  <strong>{routePercent}%</strong>
+                  <small>activos en ruta</small>
                 </div>
               </div>
 
@@ -101,8 +139,8 @@ export default async function Home() {
                 {previewOrders.length === 0 ? (
                   <div className="home-preview-row">
                     <span>LT-0000</span>
-                    <strong>Sin pedidos</strong>
-                    <em>Esperando</em>
+                    <strong>Sin pedidos activos</strong>
+                    <em>Turno limpio</em>
                   </div>
                 ) : (
                   previewOrders.map((order) => (

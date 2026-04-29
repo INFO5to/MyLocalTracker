@@ -485,7 +485,7 @@ select {
     @apply grid gap-4 sm:grid-cols-[1fr_170px];
   }
 
-  .home-line-chart,
+  .home-status-chart,
   .home-donut-card,
   .home-preview-table {
     @apply rounded-[1.5rem] border;
@@ -497,48 +497,40 @@ select {
     backdrop-filter: blur(16px);
   }
 
-  .home-line-chart {
-    @apply relative min-h-[160px] overflow-hidden;
+  .home-status-chart {
+    @apply grid min-h-[160px] content-center gap-3 overflow-hidden p-4;
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-    background-size: 36px 36px;
+      radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--accent) 20%, transparent 80%), transparent 34%),
+      linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size:
+      auto,
+      32px 32px,
+      32px 32px;
   }
 
-  .home-chart-line {
-    position: absolute;
-    left: 22px;
-    right: 22px;
-    height: 3px;
-    border-radius: 9999px;
-    background: linear-gradient(90deg, transparent, var(--accent), var(--brand), transparent);
+  .home-status-row {
+    @apply grid grid-cols-[96px_1fr_28px] items-center gap-3 text-xs font-semibold;
+    color: var(--muted);
+  }
+
+  .home-status-row strong {
+    @apply text-right text-sm;
+    color: var(--foreground);
+  }
+
+  .home-status-track {
+    @apply h-2.5 overflow-hidden rounded-full;
+    background: color-mix(in srgb, var(--muted) 12%, transparent 88%);
+  }
+
+  .home-status-bar {
+    @apply block h-full rounded-full;
+    width: var(--status-width, 0%);
     transform-origin: left center;
-    animation: home-line-grow 3.6s ease-in-out infinite;
-  }
-
-  .home-chart-line--one {
-    top: 86px;
-    transform: rotate(-8deg);
-  }
-
-  .home-chart-line--two {
-    top: 108px;
-    opacity: 0.55;
-    transform: rotate(7deg);
-    animation-delay: -1.4s;
-  }
-
-  .home-chart-point {
-    position: absolute;
-    left: 56%;
-    top: 74px;
-    width: 18px;
-    height: 18px;
-    border-radius: 9999px;
-    background: #ffffff;
-    border: 4px solid var(--accent);
-    box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent) 18%, transparent 82%);
-    animation: home-point-pulse 2.4s ease-in-out infinite;
+    background: linear-gradient(90deg, var(--accent), var(--brand));
+    box-shadow: 0 0 18px color-mix(in srgb, var(--brand) 34%, transparent 66%);
+    animation: home-status-fill 900ms ease both;
   }
 
   .home-donut-card {
@@ -1329,27 +1321,15 @@ select {
   }
 }
 
-@keyframes home-line-grow {
-  0%,
-  100% {
-    opacity: 0.54;
-    scale: 0.72 1;
+@keyframes home-status-fill {
+  from {
+    opacity: 0;
+    transform: scaleX(0.18);
   }
 
-  50% {
+  to {
     opacity: 1;
-    scale: 1 1;
-  }
-}
-
-@keyframes home-point-pulse {
-  0%,
-  100% {
-    transform: scale(0.92);
-  }
-
-  50% {
-    transform: scale(1.1);
+    transform: scaleX(1);
   }
 }
 

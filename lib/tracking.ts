@@ -414,9 +414,13 @@ function buildDashboardSnapshot(
   issueMessage?: string,
 ): DashboardSnapshot {
   const trackingBaseUrl = getTrackingBaseUrlInfo();
-  const inMotion = orders.filter((order) => order.status === "on_the_way");
-  const preparing = orders.filter((order) => order.status === "preparing");
-  const unassigned = orders.filter((order) => order.courierName === "Por asignar");
+  const activeOrders = orders.filter((order) => order.status !== "delivered");
+  const deliveredOrders = orders.filter((order) => order.status === "delivered");
+  const inMotion = activeOrders.filter((order) => order.status === "on_the_way");
+  const preparing = activeOrders.filter((order) => order.status === "preparing");
+  const unassigned = activeOrders.filter(
+    (order) => order.courierName === "Por asignar",
+  );
   const activeCouriers = couriers.filter((courier) => courier.isActive);
   const restingCouriers = couriers.filter((courier) => !courier.isActive);
 
@@ -458,9 +462,13 @@ function buildDashboardSnapshot(
     metrics: [
       {
         label: "Pedidos activos",
-        value: String(orders.length),
+        value: String(activeOrders.length),
         caption:
-          orders.length > 0 ? `${inMotion.length} en camino` : "sin pedidos aun",
+          activeOrders.length > 0
+            ? `${inMotion.length} en camino`
+            : deliveredOrders.length > 0
+              ? "turno cerrado"
+              : "sin pedidos aun",
       },
       {
         label: "Preparando",
