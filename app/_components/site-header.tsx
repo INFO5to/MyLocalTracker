@@ -32,7 +32,7 @@ export async function SiteHeader() {
   const isDriver = internalRole === "driver";
 
   return (
-    <header className="panel panel-strong sticky top-4 z-20 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <header className="panel panel-strong site-header flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <Link href="/" className="flex items-center gap-3">
         <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[color:var(--brand)] text-lg font-bold text-white">
           LT
