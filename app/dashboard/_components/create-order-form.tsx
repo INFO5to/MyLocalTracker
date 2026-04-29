@@ -6,6 +6,10 @@ import {
   createOrderAction,
   type CreateOrderActionState,
 } from "@/app/dashboard/actions";
+import {
+  DestinationMapPicker,
+  type DestinationPoint,
+} from "@/app/dashboard/_components/destination-map-picker";
 import { formatMexicanWhatsappFieldValue } from "@/lib/phone";
 import type { CourierOption } from "@/lib/tracking";
 
@@ -109,6 +113,12 @@ export function CreateOrderForm({
 }: CreateOrderFormProps) {
   const [state, formAction, pending] = useActionState(createOrderAction, initialState);
   const [customerPhone, setCustomerPhone] = useState("+521 ");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [destinationPoint, setDestinationPoint] = useState<DestinationPoint>({
+    latitude: "",
+    longitude: "",
+  });
+  const [showMapPicker, setShowMapPicker] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const toggleLabel = isOpen ? "Ocultar formulario" : "Nuevo pedido";
 
@@ -203,32 +213,72 @@ export function CreateOrderForm({
               className="field-input"
               type="text"
               name="delivery_address"
+              value={deliveryAddress}
+              onChange={(event) => setDeliveryAddress(event.target.value)}
               placeholder="Av. Reforma 214, Centro"
               required
             />
           </label>
 
-          <label className="field">
-            <span className="field-label">Latitud destino</span>
+          <div className="destination-field-card sm:col-span-2">
             <input
-              className="field-input"
-              type="number"
-              step="0.000001"
+              type="hidden"
               name="delivery_lat"
-              placeholder="19.432608"
+              value={destinationPoint.latitude}
             />
-          </label>
-
-          <label className="field">
-            <span className="field-label">Longitud destino</span>
             <input
-              className="field-input"
-              type="number"
-              step="0.000001"
+              type="hidden"
               name="delivery_lng"
-              placeholder="-99.133209"
+              value={destinationPoint.longitude}
             />
-          </label>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <span className="field-label">Destino en mapa</span>
+                <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
+                  Captura la direccion como siempre. Si quieres que el cliente
+                  vea el punto exacto, marcalo directamente en el mapa.
+                </p>
+                {destinationPoint.latitude && destinationPoint.longitude ? (
+                  <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[color:var(--brand-deep)]">
+                    Punto guardado: {destinationPoint.latitude},{" "}
+                    {destinationPoint.longitude}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  className="ios-button-secondary"
+                  onClick={() => setShowMapPicker((current) => !current)}
+                >
+                  {showMapPicker ? "Ocultar mapa" : "Marcar en mapa"}
+                </button>
+                {destinationPoint.latitude && destinationPoint.longitude ? (
+                  <button
+                    type="button"
+                    className="ios-button-quiet"
+                    onClick={() =>
+                      setDestinationPoint({ latitude: "", longitude: "" })
+                    }
+                  >
+                    Quitar punto
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            {showMapPicker ? (
+              <div className="mt-4">
+                <DestinationMapPicker
+                  addressLabel={deliveryAddress}
+                  latitude={destinationPoint.latitude}
+                  longitude={destinationPoint.longitude}
+                  onChange={setDestinationPoint}
+                />
+              </div>
+            ) : null}
+          </div>
 
           <label className="field sm:col-span-2">
             <span className="field-label">Items</span>
