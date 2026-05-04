@@ -27,6 +27,7 @@ function MotorcycleIcon() {
 export async function SiteHeader() {
   const internalSession = await getOptionalInternalSession();
   const internalRole = internalSession?.profile.role ?? null;
+  const isOwner = internalRole === "owner";
   const canAccessOperations =
     internalRole === "owner" || internalRole === "staff";
   const isDriver = internalRole === "driver";
@@ -58,6 +59,11 @@ export async function SiteHeader() {
             <>
               {canAccessOperations ? (
                 <>
+                  {isOwner ? (
+                    <Link href="/executive" className="ios-button-secondary">
+                      Vista ejecutiva
+                    </Link>
+                  ) : null}
                   <Link href="/dashboard" className="ios-button-secondary">
                     Pedidos
                   </Link>
