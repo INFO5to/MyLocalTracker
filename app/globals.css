@@ -202,6 +202,10 @@ select {
     perspective: 1400px;
   }
 
+  .home-hero-stage--public {
+    @apply lg:grid-cols-1;
+  }
+
   .public-hero-panel {
     @apply relative overflow-hidden rounded-[2.4rem] border p-6 sm:p-8;
     background:

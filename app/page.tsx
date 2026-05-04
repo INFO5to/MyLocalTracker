@@ -1,40 +1,13 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import { InstallCta } from "@/app/_components/install-cta";
 import { SiteHeader } from "@/app/_components/site-header";
-import { getDashboardSnapshot, getStatusMeta } from "@/lib/tracking";
 
 export default async function Home() {
-  const dashboard = await getDashboardSnapshot();
-  const orders = dashboard.orders;
-  const activeOrders = orders.filter((order) => order.status !== "delivered");
-  const inRouteOrders = activeOrders.filter((order) => order.status === "on_the_way");
-  const previewOrders = activeOrders.slice(0, 3);
-  const activeStatusBuckets = ([
-    "pending",
-    "confirmed",
-    "preparing",
-    "ready",
-    "on_the_way",
-  ] as const).map((status) => ({
-    status,
-    label: getStatusMeta(status).label,
-    count: activeOrders.filter((order) => order.status === status).length,
-  }));
-  const maxActiveStatusCount = Math.max(
-    1,
-    ...activeStatusBuckets.map((bucket) => bucket.count),
-  );
-  const routePercent =
-    activeOrders.length > 0
-      ? Math.round((inRouteOrders.length / activeOrders.length) * 100)
-      : 0;
-
   return (
     <main className="page-shell">
       <SiteHeader />
 
-      <section className="home-hero-stage pb-8 pt-6">
+      <section className="home-hero-stage home-hero-stage--public pb-8 pt-6">
         <div className="public-hero-panel home-hero-copy">
           <span className="home-orb home-orb--coral" aria-hidden="true" />
           <span className="home-orb home-orb--violet" aria-hidden="true" />
@@ -63,125 +36,6 @@ export default async function Home() {
             <span className="home-secondary-button border-none bg-[color:var(--accent-soft)] text-[color:var(--accent)]">
               Cliente solo ve su tracking
             </span>
-          </div>
-        </div>
-
-        <div className="home-dashboard-preview">
-          <div className="home-preview-topbar">
-            <div>
-              <span className="home-preview-dot" />
-              <span className="home-preview-dot home-preview-dot--violet" />
-              <span className="home-preview-dot home-preview-dot--mint" />
-            </div>
-            <span className="home-preview-search">Buscar pedido, ruta o cliente</span>
-          </div>
-
-          <div className="home-preview-layout">
-            <aside className="home-preview-sidebar">
-              <span className="home-preview-sidebar__logo">LT</span>
-              {["Pedidos", "Rutas", "Staff", "Ajustes"].map((item) => (
-                <span key={item} className="home-preview-menu-pill">
-                  {item}
-                </span>
-              ))}
-            </aside>
-
-            <div className="home-preview-content">
-              <div className="home-preview-metrics">
-                <div className="home-preview-metric home-preview-metric--brand">
-                  <span>Pedidos activos</span>
-                  <strong>{activeOrders.length}</strong>
-                </div>
-                <div className="home-preview-metric home-preview-metric--accent">
-                  <span>En ruta</span>
-                  <strong>{inRouteOrders.length}</strong>
-                </div>
-              </div>
-
-              <div className="home-preview-analytics">
-                <div className="home-status-chart" aria-label="Estados activos del turno">
-                  {activeStatusBuckets.map((bucket) => (
-                    <div key={bucket.status} className="home-status-row">
-                      <span>{bucket.label}</span>
-                      <div className="home-status-track">
-                        <span
-                          className="home-status-bar"
-                          style={
-                            {
-                              "--status-width":
-                                bucket.count > 0
-                                  ? `${Math.max(
-                                      10,
-                                      Math.round(
-                                        (bucket.count / maxActiveStatusCount) * 100,
-                                      ),
-                                    )}%`
-                                  : "0%",
-                            } as CSSProperties
-                          }
-                        />
-                      </div>
-                      <strong>{bucket.count}</strong>
-                    </div>
-                  ))}
-                </div>
-                <div className="home-donut-card">
-                  <span
-                    className="home-donut"
-                    style={{ "--home-donut-value": `${routePercent}%` } as CSSProperties}
-                  />
-                  <strong>{routePercent}%</strong>
-                  <small>activos en ruta</small>
-                </div>
-              </div>
-
-              <div className="home-preview-table">
-                {previewOrders.length === 0 ? (
-                  <div className="home-preview-row">
-                    <span>LT-0000</span>
-                    <strong>Sin pedidos activos</strong>
-                    <em>Turno limpio</em>
-                  </div>
-                ) : (
-                  previewOrders.map((order) => (
-                    <div key={order.code} className="home-preview-row">
-                      <span>{order.code}</span>
-                      <strong>{order.customerName}</strong>
-                      <em>{getStatusMeta(order.status).label}</em>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="home-actor-stack">
-            {[
-              {
-                title: "Negocio",
-                text: "Accede con login al dashboard para crear pedidos, asignar repartidor y cambiar estados.",
-              },
-              {
-                title: "Repartidor",
-                text: "Usa la vista interna de ruta para emitir coordenadas y activar el tracking vivo.",
-              },
-              {
-                title: "Cliente",
-                text: "Solo abre un link privado del pedido y nunca ve el panel operativo.",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="home-role-card"
-              >
-                <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--brand-deep)]">
-                  {item.title}
-                </p>
-                <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
-                  {item.text}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
