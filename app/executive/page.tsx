@@ -3,12 +3,24 @@ import type { CSSProperties } from "react";
 import { RealtimeRefresh } from "@/app/_components/realtime-refresh";
 import { SiteHeader } from "@/app/_components/site-header";
 import { requireInternalSession } from "@/lib/auth";
-import { getDashboardSnapshot, getStatusMeta } from "@/lib/tracking";
+import {
+  getDashboardSnapshot,
+  getExecutiveMovementSnapshot,
+  getStatusMeta,
+} from "@/lib/tracking";
 
-export default async function ExecutivePage() {
+type ExecutivePageProps = {
+  searchParams: Promise<{
+    date?: string;
+  }>;
+};
+
+export default async function ExecutivePage({ searchParams }: ExecutivePageProps) {
   await requireInternalSession(["owner"], "/executive");
 
+  const params = await searchParams;
   const dashboard = await getDashboardSnapshot();
+  const movement = await getExecutiveMovementSnapshot(params.date);
   const orders = dashboard.orders;
   const activeOrders = orders.filter((order) => order.status !== "delivered");
   const deliveredOrders = orders.filter((order) => order.status === "delivered");
@@ -33,6 +45,14 @@ export default async function ExecutivePage() {
     activeOrders.length > 0
       ? Math.round((inRouteOrders.length / activeOrders.length) * 100)
       : 0;
+  const maxWeeklyMovements = Math.max(
+    1,
+    ...movement.weeklyBuckets.map((bucket) => bucket.total),
+  );
+  const maxEventTypeMovements = Math.max(
+    1,
+    ...movement.eventTypeBuckets.map((bucket) => bucket.total),
+  );
 
   return (
     <main className="page-shell">
@@ -51,19 +71,12 @@ export default async function ExecutivePage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
             <span className="eyebrow">Vista ejecutiva</span>
-            <div className="space-y-3">
-              <h1 className="display-title text-4xl sm:text-5xl">
-                Pulso real del turno sin entrar al detalle operativo.
-              </h1>
-              <p className="max-w-3xl text-base leading-7 text-[color:var(--muted)]">
-                Este modulo concentra la lectura ejecutiva: pedidos activos,
-                rutas en curso, repartidores, historial cerrado y estado vivo de
-                la operacion.
-              </p>
-            </div>
+            <h1 className="display-title text-4xl sm:text-5xl">
+              Pulso real del turno.
+            </h1>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 lg:justify-end">
             <Link href="/dashboard" className="link-chip">
               Ir a pedidos
             </Link>
@@ -110,8 +123,8 @@ export default async function ExecutivePage() {
         </article>
       </section>
 
-      <section className="home-hero-stage mt-6 pb-8">
-        <div className="home-dashboard-preview">
+      <section className="executive-command-grid mt-6 pb-8">
+        <div className="home-dashboard-preview executive-operations-card">
           <div className="home-preview-topbar">
             <div>
               <span className="home-preview-dot" />
@@ -201,18 +214,116 @@ export default async function ExecutivePage() {
           </div>
         </div>
 
-        <article className="panel">
-          <span className="eyebrow">Lectura rapida</span>
-          <h2 className="section-title mt-4">Que debe vigilar el administrador</h2>
-          <div className="mt-6 space-y-3">
-            {dashboard.highlights.map((highlight) => (
-              <div
-                key={highlight}
-                className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]"
-              >
-                {highlight}
+        <article className="panel executive-history-panel">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <span className="eyebrow">Historial operativo</span>
+              <h2 className="section-title mt-4">Movimientos por fecha</h2>
+            </div>
+            <form action="/executive" className="executive-date-form">
+              <input
+                type="date"
+                name="date"
+                defaultValue={movement.selectedDate}
+                className="executive-date-input"
+                aria-label="Filtrar movimientos por fecha"
+              />
+              <button type="submit" className="ios-button-secondary">
+                Ver dia
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-6 rounded-[1.8rem] border border-[color:var(--border)] p-5">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-sm text-[color:var(--muted)]">Movimientos del dia</p>
+                <p className="metric-value mt-2">{movement.totalSelectedEvents}</p>
               </div>
-            ))}
+              <p className="text-right text-xs uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
+                {movement.selectedDateLabel}
+              </p>
+            </div>
+
+            <div
+              className="executive-week-chart mt-6"
+              aria-label="Movimientos de los ultimos siete dias"
+            >
+              {movement.weeklyBuckets.map((bucket) => (
+                <div key={bucket.key} className="executive-week-column">
+                  <span className="executive-week-value">{bucket.total}</span>
+                  <span
+                    className="executive-week-bar"
+                    style={
+                      {
+                        "--week-height": `${Math.max(
+                          bucket.total > 0 ? 18 : 4,
+                          Math.round((bucket.total / maxWeeklyMovements) * 100),
+                        )}%`,
+                      } as CSSProperties
+                    }
+                  />
+                  <span className="executive-week-label">{bucket.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="soft-card-strong">
+              <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
+                Estados del dia
+              </p>
+              <div className="mt-4 space-y-3">
+                {movement.eventTypeBuckets.length === 0 ? (
+                  <p className="text-sm text-[color:var(--muted)]">
+                    Sin movimientos registrados.
+                  </p>
+                ) : (
+                  movement.eventTypeBuckets.map((bucket) => (
+                    <div key={bucket.key} className="executive-type-row">
+                      <span>{bucket.label}</span>
+                      <span className="executive-type-track">
+                        <span
+                          style={
+                            {
+                              "--type-width": `${Math.max(
+                                12,
+                                Math.round(
+                                  (bucket.total / maxEventTypeMovements) * 100,
+                                ),
+                              )}%`,
+                            } as CSSProperties
+                          }
+                        />
+                      </span>
+                      <strong>{bucket.total}</strong>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="soft-card-strong">
+              <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
+                Ultimos eventos
+              </p>
+              <div className="mt-4 space-y-2">
+                {movement.selectedEvents.length === 0 ? (
+                  <p className="text-sm text-[color:var(--muted)]">
+                    No hay eventos para esta fecha.
+                  </p>
+                ) : (
+                  movement.selectedEvents.map((event) => (
+                    <div key={event.id} className="executive-event-row">
+                      <span>{event.trackingCode}</span>
+                      <strong>{event.title}</strong>
+                      <em>{event.occurredAtLabel}</em>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </article>
       </section>

@@ -219,6 +219,7 @@ export async function createOrderAction(
 
   revalidatePath("/");
   revalidatePath("/dashboard");
+  revalidatePath("/executive");
   refresh();
 
   return {
@@ -342,6 +343,7 @@ export async function advanceOrderStatus(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/dashboard");
+  revalidatePath("/executive");
   revalidatePath(`/driver/${trackingCode}`);
   revalidatePath(
     `/track/${
@@ -401,5 +403,6 @@ export async function saveCourierAction(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/couriers");
+  revalidatePath("/executive");
   refresh();
 }

@@ -65,6 +65,29 @@ export type DashboardSnapshot = {
   trackingBaseUrl: TrackingBaseUrlInfo;
 };
 
+export type ExecutiveMovementEvent = {
+  id: string;
+  trackingCode: string;
+  title: string;
+  eventType: string;
+  occurredAtLabel: string;
+};
+
+export type ExecutiveMovementBucket = {
+  key: string;
+  label: string;
+  total: number;
+};
+
+export type ExecutiveMovementSnapshot = {
+  selectedDate: string;
+  selectedDateLabel: string;
+  weeklyBuckets: ExecutiveMovementBucket[];
+  selectedEvents: ExecutiveMovementEvent[];
+  eventTypeBuckets: ExecutiveMovementBucket[];
+  totalSelectedEvents: number;
+};
+
 export type DriverProfileCard = {
   id: string;
   fullName: string;
@@ -291,6 +314,58 @@ function formatClockTimestamp(value: unknown) {
   }
 
   return "Sin hora";
+}
+
+function formatLocalDateKey(value: unknown) {
+  if (typeof value !== "string" || value.length === 0) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: appTimeZone,
+  }).format(new Date(value));
+}
+
+function formatLocalDateLabelFromKey(dateKey: string) {
+  return new Intl.DateTimeFormat("es-MX", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    timeZone: appTimeZone,
+  }).format(new Date(`${dateKey}T12:00:00.000Z`));
+}
+
+function normalizeDateKey(value?: string | null) {
+  if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: appTimeZone,
+  }).format(new Date());
+}
+
+function shiftDateKey(dateKey: string, deltaDays: number) {
+  const date = new Date(`${dateKey}T12:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + deltaDays);
+  return date.toISOString().slice(0, 10);
+}
+
+function getEventTypeLabel(eventType: string) {
+  if (eventType === "created") {
+    return "Creados";
+  }
+
+  const status = normalizeStatus(eventType);
+  const meta = getStatusMeta(status);
+
+  return meta.label;
 }
 
 function mapLocationRowToTrackingLocation(row: GenericRecord | null) {
@@ -566,6 +641,108 @@ export async function getDashboardSnapshot(): Promise<DashboardSnapshot> {
       [],
       "No pude leer los pedidos reales desde Supabase.",
     );
+  }
+}
+
+export async function getExecutiveMovementSnapshot(
+  selectedDateInput?: string | null,
+): Promise<ExecutiveMovementSnapshot> {
+  const selectedDate = normalizeDateKey(selectedDateInput);
+  const weeklyKeys = Array.from({ length: 7 }, (_, index) =>
+    shiftDateKey(selectedDate, index - 6),
+  );
+  const emptyWeeklyBuckets = weeklyKeys.map((key) => ({
+    key,
+    label: formatLocalDateLabelFromKey(key),
+    total: 0,
+  }));
+
+  const supabase = await getSupabaseServerClient();
+
+  if (!supabase) {
+    return {
+      selectedDate,
+      selectedDateLabel: formatLocalDateLabelFromKey(selectedDate),
+      weeklyBuckets: emptyWeeklyBuckets,
+      selectedEvents: [],
+      eventTypeBuckets: [],
+      totalSelectedEvents: 0,
+    };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("order_events")
+      .select("id, tracking_code, event_type, title, created_at")
+      .order("created_at", { ascending: false })
+      .limit(500);
+
+    if (error) {
+      throw error;
+    }
+
+    const rows = (data ?? []).map((row) => row as GenericRecord);
+    const eventsByDate = rows.reduce<Record<string, GenericRecord[]>>(
+      (accumulator, row) => {
+        const dateKey = formatLocalDateKey(row.created_at);
+
+        if (!dateKey) {
+          return accumulator;
+        }
+
+        accumulator[dateKey] = accumulator[dateKey] ?? [];
+        accumulator[dateKey].push(row);
+        return accumulator;
+      },
+      {},
+    );
+    const selectedRows = eventsByDate[selectedDate] ?? [];
+    const eventTypeCounts = selectedRows.reduce<Record<string, number>>(
+      (accumulator, row) => {
+        const eventType =
+          typeof row.event_type === "string" ? row.event_type : "created";
+        accumulator[eventType] = (accumulator[eventType] ?? 0) + 1;
+        return accumulator;
+      },
+      {},
+    );
+
+    return {
+      selectedDate,
+      selectedDateLabel: formatLocalDateLabelFromKey(selectedDate),
+      weeklyBuckets: weeklyKeys.map((key) => ({
+        key,
+        label: formatLocalDateLabelFromKey(key),
+        total: eventsByDate[key]?.length ?? 0,
+      })),
+      selectedEvents: selectedRows.slice(0, 8).map((row) => ({
+        id:
+          typeof row.id === "string"
+            ? row.id
+            : `${typeof row.tracking_code === "string" ? row.tracking_code : "evento"}-${typeof row.created_at === "string" ? row.created_at : crypto.randomUUID()}`,
+        trackingCode:
+          typeof row.tracking_code === "string" ? row.tracking_code : "LT-0000",
+        title: typeof row.title === "string" ? row.title : "Movimiento",
+        eventType:
+          typeof row.event_type === "string" ? row.event_type : "created",
+        occurredAtLabel: formatClockTimestamp(row.created_at),
+      })),
+      eventTypeBuckets: Object.entries(eventTypeCounts).map(([key, total]) => ({
+        key,
+        label: getEventTypeLabel(key),
+        total,
+      })),
+      totalSelectedEvents: selectedRows.length,
+    };
+  } catch {
+    return {
+      selectedDate,
+      selectedDateLabel: formatLocalDateLabelFromKey(selectedDate),
+      weeklyBuckets: emptyWeeklyBuckets,
+      selectedEvents: [],
+      eventTypeBuckets: [],
+      totalSelectedEvents: 0,
+    };
   }
 }
 

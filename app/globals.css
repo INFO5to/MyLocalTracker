@@ -562,6 +562,141 @@ select {
     color: var(--muted);
   }
 
+  .executive-command-grid {
+    @apply grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.55fr)];
+    align-items: stretch;
+  }
+
+  .executive-operations-card {
+    min-height: 700px;
+  }
+
+  .executive-operations-card .home-preview-layout {
+    @apply md:grid-cols-[132px_1fr];
+  }
+
+  .executive-operations-card .home-preview-metric {
+    min-height: 150px;
+    padding: 1.75rem;
+  }
+
+  .executive-operations-card .home-preview-metric strong {
+    font-size: clamp(4rem, 7vw, 6.2rem);
+  }
+
+  .executive-operations-card .home-preview-analytics {
+    @apply sm:grid-cols-[minmax(0,1fr)_260px];
+  }
+
+  .executive-operations-card .home-status-chart {
+    min-height: 270px;
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .executive-operations-card .home-status-row {
+    grid-template-columns: 132px minmax(0, 1fr) 44px;
+    font-size: 0.82rem;
+  }
+
+  .executive-operations-card .home-status-track {
+    height: 0.95rem;
+  }
+
+  .executive-operations-card .home-donut-card {
+    min-height: 270px;
+    gap: 0.65rem;
+  }
+
+  .executive-operations-card .home-donut {
+    width: 152px;
+    height: 152px;
+  }
+
+  .executive-operations-card .home-donut-card strong {
+    font-size: clamp(2.8rem, 5vw, 4rem);
+  }
+
+  .executive-history-panel {
+    @apply overflow-hidden;
+  }
+
+  .executive-date-form {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .executive-date-input {
+    @apply rounded-full border px-4 py-3 text-sm font-semibold outline-none transition;
+    color: var(--foreground);
+    border-color: var(--border);
+    background: color-mix(in srgb, var(--panel-strong) 74%, transparent 26%);
+  }
+
+  .executive-date-input:focus {
+    border-color: color-mix(in srgb, var(--brand) 62%, var(--border) 38%);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 15%, transparent 85%);
+  }
+
+  .executive-week-chart {
+    @apply grid min-h-[210px] grid-cols-7 items-end gap-2;
+  }
+
+  .executive-week-column {
+    @apply flex h-full min-w-0 flex-col items-center justify-end gap-2;
+  }
+
+  .executive-week-value {
+    @apply text-xs font-bold;
+    color: var(--foreground);
+  }
+
+  .executive-week-bar {
+    width: 100%;
+    min-height: 8px;
+    height: var(--week-height, 4%);
+    border-radius: 999px 999px 0 0;
+    background: linear-gradient(180deg, var(--brand), var(--accent));
+    box-shadow: 0 0 24px color-mix(in srgb, var(--brand) 26%, transparent 74%);
+    animation: home-status-fill 760ms ease both;
+  }
+
+  .executive-week-label {
+    @apply truncate text-[0.64rem] uppercase tracking-[0.12em];
+    color: var(--muted);
+    max-width: 100%;
+  }
+
+  .executive-type-row {
+    @apply grid grid-cols-[92px_1fr_28px] items-center gap-3 text-xs font-semibold;
+    color: var(--muted);
+  }
+
+  .executive-type-track {
+    @apply block h-2.5 overflow-hidden rounded-full;
+    background: color-mix(in srgb, var(--muted) 12%, transparent 88%);
+  }
+
+  .executive-type-track span {
+    @apply block h-full rounded-full;
+    width: var(--type-width, 0%);
+    background: linear-gradient(90deg, var(--brand), var(--accent));
+  }
+
+  .executive-event-row {
+    @apply grid grid-cols-[0.85fr_1fr_auto] items-center gap-2 rounded-2xl px-3 py-2 text-xs;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--panel-soft) 56%, transparent 44%);
+  }
+
+  .executive-event-row strong {
+    color: var(--foreground);
+  }
+
+  .executive-event-row em {
+    @apply not-italic;
+    color: var(--brand-deep);
+  }
+
   .home-preview-table {
     @apply grid gap-2 p-3;
   }
@@ -1380,6 +1515,24 @@ select {
   }
 
   .home-preview-row {
+    grid-template-columns: 1fr;
+  }
+
+  .executive-operations-card .home-donut {
+    width: 118px;
+    height: 118px;
+  }
+
+  .executive-operations-card .home-status-row {
+    grid-template-columns: 1fr;
+  }
+
+  .executive-week-chart {
+    min-height: 170px;
+    gap: 0.35rem;
+  }
+
+  .executive-event-row {
     grid-template-columns: 1fr;
   }
 
