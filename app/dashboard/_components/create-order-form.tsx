@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import {
   createOrderAction,
   type CreateOrderActionState,
@@ -24,6 +24,19 @@ const initialState: CreateOrderActionState = {
   message: "",
 };
 
+const MIN_ADDRESS_SEARCH_LENGTH = 8;
+
+type AddressSearchStatus = {
+  tone: "idle" | "loading" | "success" | "error";
+  message: string;
+};
+
+type GeocodingResult = {
+  display_name?: string;
+  lat?: string;
+  lon?: string;
+};
+
 function isValidDestinationPoint(point: DestinationPoint) {
   const latitude = point.latitude.trim();
   const longitude = point.longitude.trim();
@@ -40,6 +53,24 @@ function isValidDestinationPoint(point: DestinationPoint) {
   }
 
   return Math.abs(lat) >= 0.01 || Math.abs(lng) >= 0.01;
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="m20 20-4.2-4.2M10.8 18a7.2 7.2 0 1 0 0-14.4 7.2 7.2 0 0 0 0 14.4Z"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
 
 function ClipboardCheckIcon() {
@@ -138,8 +169,111 @@ export function CreateOrderForm({
   });
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [addressSearchStatus, setAddressSearchStatus] =
+    useState<AddressSearchStatus>({
+      tone: "idle",
+      message: "Escribe el domicilio y la lupa intentara ubicarlo en el mapa.",
+    });
+  const searchAbortRef = useRef<AbortController | null>(null);
   const hasDestinationPoint = isValidDestinationPoint(destinationPoint);
   const toggleLabel = isOpen ? "Ocultar formulario" : "Nuevo pedido";
+
+  const searchDestinationAddress = useCallback(async (query: string) => {
+    const normalizedQuery = query.trim();
+
+    if (normalizedQuery.length < MIN_ADDRESS_SEARCH_LENGTH) {
+      setAddressSearchStatus({
+        tone: "idle",
+        message: "Escribe una direccion mas completa para buscarla en el mapa.",
+      });
+      return;
+    }
+
+    searchAbortRef.current?.abort();
+    const controller = new AbortController();
+    searchAbortRef.current = controller;
+
+    setAddressSearchStatus({
+      tone: "loading",
+      message: "Buscando destino en el mapa...",
+    });
+
+    try {
+      const searchParams = new URLSearchParams({
+        addressdetails: "1",
+        countrycodes: "mx",
+        format: "jsonv2",
+        limit: "1",
+        q: normalizedQuery,
+      });
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?${searchParams.toString()}`,
+        {
+          signal: controller.signal,
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("No se pudo consultar el mapa.");
+      }
+
+      const [firstResult] = (await response.json()) as GeocodingResult[];
+      const latitude = Number(firstResult?.lat);
+      const longitude = Number(firstResult?.lon);
+
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        setAddressSearchStatus({
+          tone: "error",
+          message:
+            "No encontre ese domicilio. Puedes afinarlo o marcar el punto manualmente.",
+        });
+        return;
+      }
+
+      setDestinationPoint({
+        latitude: latitude.toFixed(6),
+        longitude: longitude.toFixed(6),
+      });
+      setShowMapPicker(true);
+      setAddressSearchStatus({
+        tone: "success",
+        message: firstResult.display_name
+          ? `Destino ubicado: ${firstResult.display_name}`
+          : "Destino ubicado en el mapa.",
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
+      setAddressSearchStatus({
+        tone: "error",
+        message:
+          "No pude buscar el domicilio ahora. El mapa manual sigue disponible.",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const normalizedAddress = deliveryAddress.trim();
+
+    if (normalizedAddress.length < MIN_ADDRESS_SEARCH_LENGTH) {
+      searchAbortRef.current?.abort();
+      setAddressSearchStatus({
+        tone: "idle",
+        message: "Escribe el domicilio y la lupa intentara ubicarlo en el mapa.",
+      });
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void searchDestinationAddress(normalizedAddress);
+    }, 900);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [deliveryAddress, searchDestinationAddress]);
 
   return (
     <section className="panel panel-strong new-order-shell">
@@ -228,15 +362,37 @@ export function CreateOrderForm({
 
           <label className="field sm:col-span-2">
             <span className="field-label">Direccion de entrega</span>
-            <input
-              className="field-input"
-              type="text"
-              name="delivery_address"
-              value={deliveryAddress}
-              onChange={(event) => setDeliveryAddress(event.target.value)}
-              placeholder="Av. Reforma 214, Centro"
-              required
-            />
+            <div className="address-search-field">
+              <input
+                className="field-input field-input--with-action"
+                type="text"
+                name="delivery_address"
+                value={deliveryAddress}
+                onChange={(event) => setDeliveryAddress(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void searchDestinationAddress(deliveryAddress);
+                  }
+                }}
+                placeholder="Av. Reforma 214, Centro"
+                required
+              />
+              <button
+                type="button"
+                className="address-search-button"
+                aria-label="Buscar direccion en el mapa"
+                onClick={() => searchDestinationAddress(deliveryAddress)}
+              >
+                <SearchIcon />
+              </button>
+            </div>
+            <p
+              className={`address-search-status address-search-status--${addressSearchStatus.tone}`}
+              aria-live="polite"
+            >
+              {addressSearchStatus.message}
+            </p>
           </label>
 
           <div className="destination-field-card sm:col-span-2">

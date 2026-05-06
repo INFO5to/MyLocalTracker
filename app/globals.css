@@ -858,6 +858,52 @@ select {
     color: color-mix(in srgb, var(--muted) 72%, transparent 28%);
   }
 
+  .field-input--with-action {
+    padding-right: 3.65rem;
+  }
+
+  .address-search-field {
+    @apply relative;
+  }
+
+  .address-search-button {
+    @apply absolute right-2 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition duration-200;
+    color: var(--foreground);
+    border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--border) 84%);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.42), transparent 36%),
+      color-mix(in srgb, var(--panel-strong) 84%, transparent 16%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 12px 26px -22px var(--shadow-strong);
+  }
+
+  .address-search-button:hover {
+    transform: translateY(-50%) scale(1.03);
+    border-color: color-mix(in srgb, var(--brand) 42%, var(--border) 58%);
+  }
+
+  .address-search-button:active {
+    transform: translateY(-50%) scale(0.98);
+  }
+
+  .address-search-status {
+    @apply text-xs leading-5;
+    color: var(--muted);
+  }
+
+  .address-search-status--loading {
+    color: color-mix(in srgb, var(--accent) 72%, var(--foreground) 28%);
+  }
+
+  .address-search-status--success {
+    color: color-mix(in srgb, #10b981 72%, var(--foreground) 28%);
+  }
+
+  .address-search-status--error {
+    color: color-mix(in srgb, #ef4444 74%, var(--foreground) 26%);
+  }
+
   .destination-field-card {
     @apply rounded-[1.6rem] border p-4;
     border-color: var(--border);
