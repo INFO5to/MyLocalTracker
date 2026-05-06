@@ -43,10 +43,22 @@ const destinationPickerIcon = divIcon({
 });
 
 function parsePoint(latitude: string, longitude: string): MapPoint | null {
-  const lat = Number(latitude);
-  const lng = Number(longitude);
+  const latitudeValue = latitude.trim();
+  const longitudeValue = longitude.trim();
+
+  if (!latitudeValue || !longitudeValue) {
+    return null;
+  }
+
+  const lat = Number(latitudeValue);
+  const lng = Number(longitudeValue);
 
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return null;
+  }
+
+  // Avoid keeping the accidental "Null Island" point produced by empty fields.
+  if (Math.abs(lat) < 0.01 && Math.abs(lng) < 0.01) {
     return null;
   }
 

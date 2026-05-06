@@ -24,6 +24,24 @@ const initialState: CreateOrderActionState = {
   message: "",
 };
 
+function isValidDestinationPoint(point: DestinationPoint) {
+  const latitude = point.latitude.trim();
+  const longitude = point.longitude.trim();
+
+  if (!latitude || !longitude) {
+    return false;
+  }
+
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return false;
+  }
+
+  return Math.abs(lat) >= 0.01 || Math.abs(lng) >= 0.01;
+}
+
 function ClipboardCheckIcon() {
   return (
     <svg
@@ -120,6 +138,7 @@ export function CreateOrderForm({
   });
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const hasDestinationPoint = isValidDestinationPoint(destinationPoint);
   const toggleLabel = isOpen ? "Ocultar formulario" : "Nuevo pedido";
 
   return (
@@ -224,12 +243,12 @@ export function CreateOrderForm({
             <input
               type="hidden"
               name="delivery_lat"
-              value={destinationPoint.latitude}
+              value={hasDestinationPoint ? destinationPoint.latitude : ""}
             />
             <input
               type="hidden"
               name="delivery_lng"
-              value={destinationPoint.longitude}
+              value={hasDestinationPoint ? destinationPoint.longitude : ""}
             />
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -238,7 +257,7 @@ export function CreateOrderForm({
                   Captura la direccion como siempre. Si quieres que el cliente
                   vea el punto exacto, marcalo directamente en el mapa.
                 </p>
-                {destinationPoint.latitude && destinationPoint.longitude ? (
+                {hasDestinationPoint ? (
                   <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[color:var(--brand-deep)]">
                     Punto guardado: {destinationPoint.latitude},{" "}
                     {destinationPoint.longitude}
@@ -254,7 +273,7 @@ export function CreateOrderForm({
                 >
                   {showMapPicker ? "Ocultar mapa" : "Marcar en mapa"}
                 </button>
-                {destinationPoint.latitude && destinationPoint.longitude ? (
+                {hasDestinationPoint ? (
                   <button
                     type="button"
                     className="ios-button-quiet"
@@ -272,8 +291,8 @@ export function CreateOrderForm({
               <div className="mt-4">
                 <DestinationMapPicker
                   addressLabel={deliveryAddress}
-                  latitude={destinationPoint.latitude}
-                  longitude={destinationPoint.longitude}
+                  latitude={hasDestinationPoint ? destinationPoint.latitude : ""}
+                  longitude={hasDestinationPoint ? destinationPoint.longitude : ""}
                   onChange={setDestinationPoint}
                 />
               </div>
