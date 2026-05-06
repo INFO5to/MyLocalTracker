@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { divIcon, type Marker as LeafletMarker } from "leaflet";
 import {
   MapContainer,
   Marker,
   Popup,
   TileLayer,
+  useMap,
   useMapEvents,
 } from "react-leaflet";
 import type { DestinationPoint } from "@/app/dashboard/_components/destination-map-picker";
@@ -20,6 +22,18 @@ type DestinationMapPickerVisualProps = {
 };
 
 const defaultCenter: MapPoint = [19.432608, -99.133209];
+const tileProviders = [
+  {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  },
+  {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+  },
+];
 
 const destinationPickerIcon = divIcon({
   className: "tracking-map-marker",
@@ -60,6 +74,36 @@ function ClickHandler({
   return null;
 }
 
+function MapAutoSync({ center, zoom }: { center: MapPoint; zoom: number }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView(center, zoom, {
+      animate: true,
+    });
+
+    const frameId = window.requestAnimationFrame(() => {
+      map.invalidateSize({
+        animate: false,
+        pan: false,
+      });
+    });
+    const timeoutId = window.setTimeout(() => {
+      map.invalidateSize({
+        animate: false,
+        pan: false,
+      });
+    }, 260);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+    };
+  }, [center, map, zoom]);
+
+  return null;
+}
+
 export function DestinationMapPickerVisual({
   addressLabel,
   latitude,
@@ -68,6 +112,8 @@ export function DestinationMapPickerVisual({
 }: DestinationMapPickerVisualProps) {
   const selectedPoint = parsePoint(latitude, longitude);
   const center = selectedPoint ?? defaultCenter;
+  const [tileProviderIndex, setTileProviderIndex] = useState(0);
+  const tileProvider = tileProviders[tileProviderIndex];
 
   return (
     <div className="destination-map-picker">
@@ -78,9 +124,20 @@ export function DestinationMapPickerVisual({
         className="destination-map-picker__canvas"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution={tileProvider.attribution}
+          detectRetina
+          eventHandlers={{
+            tileerror() {
+              setTileProviderIndex((current) =>
+                current + 1 < tileProviders.length ? current + 1 : current,
+              );
+            },
+          }}
+          key={tileProvider.url}
+          maxZoom={20}
+          url={tileProvider.url}
         />
+        <MapAutoSync center={center} zoom={selectedPoint ? 16 : 13} />
         <ClickHandler onChange={onChange} />
 
         {selectedPoint ? (

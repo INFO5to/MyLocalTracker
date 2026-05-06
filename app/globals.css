@@ -1383,6 +1383,20 @@ select {
   background: transparent;
 }
 
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-tile {
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+}
+
+.leaflet-tile-pane {
+  filter: saturate(1.04) contrast(0.98) brightness(0.98);
+}
+
+html[data-theme="dark"] .leaflet-tile-pane {
+  filter: saturate(0.92) contrast(1.04) brightness(0.82);
+}
+
 .leaflet-control-attribution,
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
