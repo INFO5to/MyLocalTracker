@@ -26,16 +26,37 @@ type TrackingMapVisualProps = {
 
 const courierIcon = divIcon({
   className: "tracking-map-marker",
-  html: '<span class="tracking-map-marker__core tracking-map-marker__core--courier"></span>',
-  iconSize: [26, 26],
-  iconAnchor: [13, 13],
+  html: `
+    <span class="tracking-map-marker__badge tracking-map-marker__badge--courier" aria-hidden="true">
+      <svg viewBox="0 0 64 64" class="tracking-map-marker__icon">
+        <path d="M12 41h7l7-13h12l4 7h6" />
+        <path d="M26 28l5-9h9" />
+        <path d="M42 35l-7-13" />
+        <path d="M20 41h22" />
+        <circle cx="18" cy="43" r="8" />
+        <circle cx="48" cy="43" r="8" />
+      </svg>
+    </span>
+  `,
+  iconSize: [46, 46],
+  iconAnchor: [23, 35],
 });
 
 const destinationIcon = divIcon({
   className: "tracking-map-marker",
-  html: '<span class="tracking-map-marker__core tracking-map-marker__core--destination"></span>',
-  iconSize: [26, 26],
-  iconAnchor: [13, 13],
+  html: `
+    <span class="tracking-map-marker__badge tracking-map-marker__badge--destination" aria-hidden="true">
+      <svg viewBox="0 0 64 64" class="tracking-map-marker__icon">
+        <circle cx="32" cy="18" r="8" />
+        <path d="M22 55c1.5-11 5-17 10-17s8.5 6 10 17" />
+        <path d="M23 35c-7-4-10-9-9-15" />
+        <path d="M41 34c7-4 10-10 9-17" />
+        <path d="M47 16l5-6" />
+      </svg>
+    </span>
+  `,
+  iconSize: [46, 46],
+  iconAnchor: [23, 39],
 });
 
 function FitBounds({ points }: { points: MapPoint[] }) {
@@ -141,12 +162,12 @@ export function TrackingMapVisual({
       <div className="tracking-map-overlay">
         <div className="tracking-map-legend">
           <span className="tracking-map-legend__item">
-            <span className="tracking-map-legend__dot tracking-map-legend__dot--courier" />
+            <span className="tracking-map-legend__icon">🏍</span>
             Repartidor
           </span>
           <span className="tracking-map-legend__item">
-            <span className="tracking-map-legend__dot tracking-map-legend__dot--destination" />
-            Destino
+            <span className="tracking-map-legend__icon">🙋</span>
+            Cliente
           </span>
         </div>
         {courierLocation ? (
