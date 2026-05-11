@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { OrderStatus, TrackingLocation } from "@/lib/tracking";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
@@ -27,9 +27,23 @@ type UploadLocationInput = {
 };
 
 const LOCATION_INTERVAL_MS = 5000;
+const inTransitStatus: OrderStatus = "on_the_way";
 
 function formatCoordinate(value: number) {
   return value.toFixed(5);
+}
+
+function getStatusLabel(status: OrderStatus) {
+  const labels: Record<OrderStatus, string> = {
+    pending: "Pendiente",
+    confirmed: "Confirmado",
+    preparing: "Preparando",
+    ready: "Listo para salir",
+    on_the_way: "En camino",
+    delivered: "Entregado",
+  };
+
+  return labels[status];
 }
 
 function getBrowserPosition() {
@@ -53,27 +67,18 @@ export function DriverTrackingConsole({
 }: DriverTrackingConsoleProps) {
   const [isTracking, setIsTracking] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [trackingLocked, setTrackingLocked] = useState(false);
   const [message, setMessage] = useState(
-    trackingEnabled
-      ? "El pedido ya esta marcado en ruta. Puedes empezar a emitir ubicaciones cada 5 segundos."
-      : "Marca el pedido como En camino y luego inicia el tracking continuo.",
+    currentStatus === inTransitStatus
+      ? "Tracking automatico listo: deja esta pantalla abierta para enviar ubicacion cada 5 segundos."
+      : "El tracking automatico se activara cuando el pedido pase a En camino.",
   );
   const [lastLocation, setLastLocation] = useState<TrackingLocation | null>(
     initialLiveLocation,
   );
   const intervalRef = useRef<number | null>(null);
+  const isCapturingRef = useRef(false);
 
-  function stopTracking() {
-    if (intervalRef.current !== null) {
-      window.clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    setIsTracking(false);
-  }
-
-  async function uploadLocation(payload: UploadLocationInput) {
+  const uploadLocation = useCallback(async (payload: UploadLocationInput) => {
     const supabase = getSupabaseBrowserClient();
 
     if (!supabase) {
@@ -119,9 +124,9 @@ export function DriverTrackingConsole({
       `Ubicacion enviada: ${formatCoordinate(payload.latitude)}, ${formatCoordinate(payload.longitude)}.`,
     );
     return true;
-  }
+  }, [courierId, orderId, trackingCode]);
 
-  async function captureCurrentLocation() {
+  const captureCurrentLocation = useCallback(async () => {
     if (!courierId) {
       setMessage("Asigna un repartidor al pedido antes de iniciar tracking.");
       return;
@@ -129,11 +134,16 @@ export function DriverTrackingConsole({
 
     if (!("geolocation" in navigator)) {
       setMessage(
-        "Este dispositivo no expone geolocalizacion. Usa la simulacion para probar el mapa.",
+        "Este dispositivo no expone geolocalizacion. Revisa permisos o prueba desde el celular del repartidor.",
       );
       return;
     }
 
+    if (isCapturingRef.current) {
+      return;
+    }
+
+    isCapturingRef.current = true;
     setIsSending(true);
 
     try {
@@ -156,79 +166,42 @@ export function DriverTrackingConsole({
       });
     } catch {
       setMessage(
-        "No pude leer la ubicacion del navegador. Verifica permisos o usa la simulacion.",
+        "No pude leer la ubicacion del navegador. Verifica permisos de ubicacion en el dispositivo.",
       );
     } finally {
+      isCapturingRef.current = false;
       setIsSending(false);
     }
-  }
+  }, [courierId, uploadLocation]);
 
-  async function simulateMovement() {
-    if (!courierId) {
-      setMessage("Asigna un repartidor antes de simular la ruta.");
+  useEffect(() => {
+    if (currentStatus !== inTransitStatus || !courierId) {
+      if (intervalRef.current !== null) {
+        window.clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+
+      setIsTracking(false);
+      if (currentStatus === "delivered") {
+        setMessage(
+          "El pedido ya fue entregado. El tracking continuo se cerro automaticamente.",
+        );
+      }
       return;
     }
 
-    setIsSending(true);
-
-    try {
-      const baseLatitude =
-        lastLocation?.latitude ?? destinationLocation?.latitude ?? 19.432608;
-      const baseLongitude =
-        lastLocation?.longitude ?? destinationLocation?.longitude ?? -99.133209;
-      const latitudeOffset = (Math.random() - 0.5) * 0.0022;
-      const longitudeOffset = (Math.random() - 0.5) * 0.0022;
-
-      await uploadLocation({
-        latitude: baseLatitude + latitudeOffset,
-        longitude: baseLongitude + longitudeOffset,
-        accuracyMeters: 8,
-        speedMps: 4.5,
-        headingDegrees: Math.floor(Math.random() * 360),
-        source: "simulated_test",
-      });
-    } finally {
-      setIsSending(false);
-    }
-  }
-
-  async function startTracking() {
-    if (isTracking) {
+    if (intervalRef.current !== null) {
       return;
     }
 
     setIsTracking(true);
-    if (currentStatus !== "delivered") {
-      setTrackingLocked(true);
-    }
-    setMessage(
-      currentStatus === "delivered"
-        ? "El pedido ya fue entregado. Solo puedes emitir una ultima senal manual si lo necesitas."
-        : "Tracking continuo activo. Desde ahora quedara bloqueado hasta que el pedido pase a Entregado.",
-    );
-    await captureCurrentLocation();
+    setMessage("Tracking automatico activo: enviando ubicacion cada 5 segundos.");
+    void captureCurrentLocation();
 
     intervalRef.current = window.setInterval(() => {
       void captureCurrentLocation();
     }, LOCATION_INTERVAL_MS);
-  }
-
-  useEffect(() => {
-    if (currentStatus !== "delivered") {
-      return;
-    }
-
-    if (isTracking) {
-      stopTracking();
-    }
-
-    if (trackingLocked) {
-      setTrackingLocked(false);
-      setMessage(
-        "El pedido ya fue entregado. El tracking continuo se cerro automaticamente.",
-      );
-    }
-  }, [currentStatus, isTracking, trackingLocked]);
+  }, [captureCurrentLocation, courierId, currentStatus]);
 
   useEffect(() => {
     return () => {
@@ -243,17 +216,23 @@ export function DriverTrackingConsole({
       <span className="eyebrow">Modo repartidor</span>
       <h2 className="section-title mt-4">Tracking del dispositivo</h2>
       <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-        Esta vista envia coordenadas a Supabase cada 5 segundos mientras el pedido
-        va en ruta. Deja la pantalla abierta en el celular para ver el movimiento
-        reflejado en el tracking publico.
+        Cuando el pedido esta En camino, esta vista envia coordenadas a Supabase
+        cada 5 segundos automaticamente. Deja la pantalla abierta en el celular
+        para reflejar el movimiento en el tracking publico.
       </p>
 
       <div className="soft-card-strong mt-6 text-sm leading-7 text-[color:var(--muted)]">
         <p>Pedido: {trackingCode}</p>
-        <p>Estado actual: {currentStatus}</p>
+        <p>Estado actual: {getStatusLabel(currentStatus)}</p>
         <p>
-          Tracking continuo: {trackingEnabled ? "listo para activarse" : "aun no iniciado"}
+          Tracking automatico:{" "}
+          {isTracking
+            ? "activo cada 5 segundos"
+            : currentStatus === inTransitStatus
+              ? "esperando permisos del navegador"
+              : "en espera de En camino"}
         </p>
+        <p>Tracking publico: {trackingEnabled ? "habilitado" : "pendiente"}</p>
         <p>Repartidor vinculado: {courierId ? "si" : "no"}</p>
       </div>
 
@@ -268,64 +247,6 @@ export function DriverTrackingConsole({
         >
           {isSending ? "Enviando..." : "Enviar ubicacion una vez"}
         </button>
-
-        {isTracking ? (
-          currentStatus === "delivered" ? (
-            <button
-              type="button"
-              onClick={() => {
-                stopTracking();
-                setTrackingLocked(false);
-                setMessage("Tracking continuo detenido despues de cerrar el pedido.");
-              }}
-              className="ios-button-secondary"
-            >
-              Detener tracking continuo
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="ios-button-secondary opacity-70"
-            >
-              Tracking bloqueado hasta entregar
-            </button>
-          )
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              void startTracking();
-            }}
-            disabled={!courierId || currentStatus === "delivered"}
-            className="ios-button-secondary"
-          >
-            {trackingLocked ? "Tracking bloqueado" : "Iniciar tracking cada 5s"}
-          </button>
-        )}
-
-        {trackingLocked && currentStatus !== "delivered" ? (
-          <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            className="ios-button-ghost opacity-70"
-          >
-            Se cerrara solo al entregar
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              void simulateMovement();
-            }}
-            disabled={isSending || !courierId}
-            className="ios-button-ghost"
-          >
-            Simular avance de prueba
-          </button>
-        )}
       </div>
 
       <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">{message}</p>
@@ -343,7 +264,7 @@ export function DriverTrackingConsole({
           <p className="mt-2 text-sm text-[color:var(--muted)]">
             {lastLocation
               ? `Hora ${lastLocation.recordedAtLabel} por ${lastLocation.source}.`
-              : "Usa ubicacion actual o simulacion para empezar."}
+              : "Pasa el pedido a En camino o envia una ubicacion manual para empezar."}
           </p>
         </div>
 
