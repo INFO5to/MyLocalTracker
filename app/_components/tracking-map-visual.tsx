@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import {
   MapContainer,
   Marker,
-  Polyline,
   Popup,
   TileLayer,
   useMap,
@@ -24,18 +23,32 @@ type TrackingMapVisualProps = {
   } | null;
 };
 
+const courierSvg = `
+  <svg viewBox="0 0 64 64" class="tracking-map-marker__icon">
+    <path d="M12 41h7l7-13h12l4 7h6" />
+    <path d="M26 28l5-9h9" />
+    <path d="M42 35l-7-13" />
+    <path d="M20 41h22" />
+    <circle cx="18" cy="43" r="8" />
+    <circle cx="48" cy="43" r="8" />
+  </svg>
+`;
+
+const customerSvg = `
+  <svg viewBox="0 0 64 64" class="tracking-map-marker__icon">
+    <circle cx="32" cy="18" r="8" />
+    <path d="M22 55c1.5-11 5-17 10-17s8.5 6 10 17" />
+    <path d="M23 35c-7-4-10-9-9-15" />
+    <path d="M41 34c7-4 10-10 9-17" />
+    <path d="M47 16l5-6" />
+  </svg>
+`;
+
 const courierIcon = divIcon({
   className: "tracking-map-marker",
   html: `
     <span class="tracking-map-marker__badge tracking-map-marker__badge--courier" aria-hidden="true">
-      <svg viewBox="0 0 64 64" class="tracking-map-marker__icon">
-        <path d="M12 41h7l7-13h12l4 7h6" />
-        <path d="M26 28l5-9h9" />
-        <path d="M42 35l-7-13" />
-        <path d="M20 41h22" />
-        <circle cx="18" cy="43" r="8" />
-        <circle cx="48" cy="43" r="8" />
-      </svg>
+      ${courierSvg}
     </span>
   `,
   iconSize: [46, 46],
@@ -46,13 +59,7 @@ const destinationIcon = divIcon({
   className: "tracking-map-marker",
   html: `
     <span class="tracking-map-marker__badge tracking-map-marker__badge--destination" aria-hidden="true">
-      <svg viewBox="0 0 64 64" class="tracking-map-marker__icon">
-        <circle cx="32" cy="18" r="8" />
-        <path d="M22 55c1.5-11 5-17 10-17s8.5 6 10 17" />
-        <path d="M23 35c-7-4-10-9-9-15" />
-        <path d="M41 34c7-4 10-10 9-17" />
-        <path d="M47 16l5-6" />
-      </svg>
+      ${customerSvg}
     </span>
   `,
   iconSize: [46, 46],
@@ -81,6 +88,31 @@ function FitBounds({ points }: { points: MapPoint[] }) {
   }, [map, points]);
 
   return null;
+}
+
+function CourierLegendIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 64 64">
+      <path d="M12 41h7l7-13h12l4 7h6" />
+      <path d="M26 28l5-9h9" />
+      <path d="M42 35l-7-13" />
+      <path d="M20 41h22" />
+      <circle cx="18" cy="43" r="8" />
+      <circle cx="48" cy="43" r="8" />
+    </svg>
+  );
+}
+
+function CustomerLegendIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 64 64">
+      <circle cx="32" cy="18" r="8" />
+      <path d="M22 55c1.5-11 5-17 10-17s8.5 6 10 17" />
+      <path d="M23 35c-7-4-10-9-9-15" />
+      <path d="M41 34c7-4 10-10 9-17" />
+      <path d="M47 16l5-6" />
+    </svg>
+  );
 }
 
 export function TrackingMapVisual({
@@ -147,26 +179,26 @@ export function TrackingMapVisual({
         {destinationPoint ? (
           <Marker position={destinationPoint} icon={destinationIcon}>
             <Popup>
-              <strong>Destino</strong>
+              <strong>Cliente</strong>
               <br />
               {destinationLabel}
             </Popup>
           </Marker>
-        ) : null}
-
-        {courierPoint && destinationPoint ? (
-          <Polyline positions={[courierPoint, destinationPoint]} pathOptions={{ color: "#eb6a42", weight: 4, opacity: 0.8 }} />
         ) : null}
       </MapContainer>
 
       <div className="tracking-map-overlay">
         <div className="tracking-map-legend">
           <span className="tracking-map-legend__item">
-            <span className="tracking-map-legend__icon">🏍</span>
+            <span className="tracking-map-legend__icon">
+              <CourierLegendIcon />
+            </span>
             Repartidor
           </span>
           <span className="tracking-map-legend__item">
-            <span className="tracking-map-legend__icon">🙋</span>
+            <span className="tracking-map-legend__icon">
+              <CustomerLegendIcon />
+            </span>
             Cliente
           </span>
         </div>
@@ -181,13 +213,13 @@ export function TrackingMapVisual({
           </div>
         ) : missingCourier ? (
           <div className="tracking-map-overlay__note">
-            Ya se ve el destino. Falta que el repartidor envie su primera
+            Ya se ve el cliente. Falta que el repartidor envie su primera
             ubicacion.
           </div>
         ) : (
           <div className="tracking-map-overlay__note">
             Ya llego la senal del repartidor. Falta capturar el destino para
-            unir ambos puntos.
+            mostrar tambien el punto del cliente.
           </div>
         )}
       </div>

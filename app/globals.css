@@ -1483,6 +1483,16 @@ select {
   font-size: 0.82rem;
 }
 
+.tracking-map-legend__icon svg {
+  height: 0.95rem;
+  width: 0.95rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .leaflet-container {
   font-family: var(--font-body), sans-serif;
   background: transparent;
