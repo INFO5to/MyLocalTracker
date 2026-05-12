@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { InstallCta } from "@/app/_components/install-cta";
 import { RealtimeRefresh } from "@/app/_components/realtime-refresh";
 import { SiteHeader } from "@/app/_components/site-header";
 import { CreateOrderForm } from "@/app/dashboard/_components/create-order-form";
@@ -121,58 +120,6 @@ export default async function DashboardPage() {
           description="Aqui quedan los pedidos que todavia estan en operacion: pendientes, confirmados, preparando, listos o en camino."
           orders={activeOrders}
         />
-      </section>
-
-      <section className="mt-6 grid gap-6 xl:grid-cols-3">
-        <article className="panel">
-          <span className="eyebrow">Link publico</span>
-          <h2 className="section-title mt-4">Base actual del tracking compartido</h2>
-          <div className="soft-card-strong mt-6">
-            <p className="text-sm uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
-              {dashboard.trackingBaseUrl.mode === "public"
-                ? "URL publica"
-                : dashboard.trackingBaseUrl.mode === "lan"
-                  ? "URL de red local"
-                  : "URL local"}
-            </p>
-            <p className="mt-3 break-all text-base font-semibold text-[color:var(--foreground)]">
-              {dashboard.trackingBaseUrl.value}
-            </p>
-            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-              {dashboard.trackingBaseUrl.note}
-            </p>
-          </div>
-        </article>
-
-        <article className="panel">
-          <span className="eyebrow">Alertas del turno</span>
-          <h2 className="section-title mt-4">Donde conviene poner atencion</h2>
-          <div className="mt-6 space-y-3">
-            {dashboard.highlights.map((highlight) => (
-              <div
-                key={highlight}
-                className="soft-card-strong text-sm leading-7 text-[color:var(--muted)]"
-              >
-                {highlight}
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <div className="space-y-6">
-          <article className="panel">
-            <span className="eyebrow">Roadmap inmediato</span>
-            <h2 className="section-title mt-4">Siguiente capa natural del MVP</h2>
-            <div className="mt-6 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
-              <p>1. Mantener dashboard y vista repartidor solo para usuarios internos.</p>
-              <p>2. Dejar el tracking del cliente solo por token privado del pedido.</p>
-              <p>3. Endurecer politicas RLS por rol en Supabase.</p>
-              <p>4. Salir del sandbox de WhatsApp hacia un canal de produccion.</p>
-            </div>
-          </article>
-
-          <InstallCta />
-        </div>
       </section>
     </main>
   );
