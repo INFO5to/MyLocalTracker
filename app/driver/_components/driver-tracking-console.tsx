@@ -9,7 +9,6 @@ type DriverTrackingConsoleProps = {
   trackingCode: string;
   courierId: string | null;
   currentStatus: OrderStatus;
-  trackingEnabled: boolean;
   destinationLocation: {
     latitude: number;
     longitude: number;
@@ -61,7 +60,6 @@ export function DriverTrackingConsole({
   trackingCode,
   courierId,
   currentStatus,
-  trackingEnabled,
   destinationLocation,
   initialLiveLocation,
 }: DriverTrackingConsoleProps) {
@@ -212,31 +210,20 @@ export function DriverTrackingConsole({
   }, []);
 
   return (
-    <article className="panel">
-      <span className="eyebrow">Modo repartidor</span>
-      <h2 className="section-title mt-4">Tracking del dispositivo</h2>
-      <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-        Cuando el pedido esta En camino, esta vista envia coordenadas a Supabase
-        cada 5 segundos automaticamente. Deja la pantalla abierta en el celular
-        para reflejar el movimiento en el tracking publico.
-      </p>
-
-      <div className="soft-card-strong mt-6 text-sm leading-7 text-[color:var(--muted)]">
-        <p>Pedido: {trackingCode}</p>
-        <p>Estado actual: {getStatusLabel(currentStatus)}</p>
-        <p>
-          Tracking automatico:{" "}
+    <article className="driver-location-console">
+      <div className="driver-location-console__status">
+        <span className="eyebrow">Ubicacion</span>
+        <strong>
           {isTracking
-            ? "activo cada 5 segundos"
+            ? "Enviando cada 5s"
             : currentStatus === inTransitStatus
-              ? "esperando permisos del navegador"
-              : "en espera de En camino"}
-        </p>
-        <p>Tracking publico: {trackingEnabled ? "habilitado" : "pendiente"}</p>
-        <p>Repartidor vinculado: {courierId ? "si" : "no"}</p>
+              ? "Permiso de ubicacion"
+              : getStatusLabel(currentStatus)}
+        </strong>
+        <small>{trackingCode}</small>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-3">
+      <div className="driver-location-console__action">
         <button
           type="button"
           onClick={() => {
@@ -249,40 +236,13 @@ export function DriverTrackingConsole({
         </button>
       </div>
 
-      <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">{message}</p>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <div className="soft-card-strong">
-          <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-            Ultima coordenada enviada
-          </p>
-          <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-            {lastLocation
-              ? `${formatCoordinate(lastLocation.latitude)}, ${formatCoordinate(lastLocation.longitude)}`
-              : "Sin puntos todavia"}
-          </p>
-          <p className="mt-2 text-sm text-[color:var(--muted)]">
-            {lastLocation
-              ? `Hora ${lastLocation.recordedAtLabel} por ${lastLocation.source}.`
-              : "Pasa el pedido a En camino o envia una ubicacion manual para empezar."}
-          </p>
-        </div>
-
-        <div className="soft-card-strong">
-          <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-            Destino del cliente
-          </p>
-          <p className="mt-3 text-sm font-semibold text-[color:var(--foreground)]">
-            {destinationLocation
-              ? `${formatCoordinate(destinationLocation.latitude)}, ${formatCoordinate(destinationLocation.longitude)}`
-              : "Todavia sin coordenadas de entrega"}
-          </p>
-          <p className="mt-2 text-sm text-[color:var(--muted)]">
-            Si capturaste latitud y longitud al crear el pedido, aqui se usa ese
-            punto como destino del mapa.
-          </p>
-        </div>
-      </div>
+      <p className="driver-location-console__message">
+        {lastLocation
+          ? `Ultima senal ${lastLocation.recordedAtLabel}: ${formatCoordinate(lastLocation.latitude)}, ${formatCoordinate(lastLocation.longitude)}.`
+          : destinationLocation
+            ? message
+            : "Agrega destino o envia una primera ubicacion para activar el mapa."}
+      </p>
     </article>
   );
 }

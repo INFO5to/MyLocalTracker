@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { InstallCta } from "@/app/_components/install-cta";
@@ -16,6 +17,7 @@ import {
   getInternalTrackingOrderByCode,
   getNextStatusLabel,
   getStatusMeta,
+  orderSteps,
 } from "@/lib/tracking";
 
 type DriverPageProps = {
@@ -58,6 +60,7 @@ export default async function DriverPage({ params }: DriverPageProps) {
   const trackingUrl = buildTrackingUrl(tracking.publicToken);
   const trackingReady =
     tracking.status === "on_the_way" || tracking.status === "delivered";
+  const currentStatusIndex = orderSteps.indexOf(tracking.status);
 
   return (
     <main className="page-shell dashboard-shell">
@@ -86,12 +89,10 @@ export default async function DriverPage({ params }: DriverPageProps) {
             <span className="eyebrow">Ruta del repartidor</span>
             <div className="space-y-3">
               <h1 className="display-title text-4xl sm:text-5xl">
-                Opera la salida del pedido y envia coordenadas en vivo.
+                Pedido {tracking.code}
               </h1>
               <p className="max-w-3xl text-base leading-7 text-[color:var(--muted)]">
-                Esta pantalla esta pensada para el telefono del repartidor. Desde
-                aqui puede iniciar el tracking, mandar su ubicacion a Supabase y
-                mover el pedido por las ultimas etapas del flujo.
+                {tracking.customerName} · {tracking.destination}
               </p>
             </div>
           </div>
@@ -113,15 +114,45 @@ export default async function DriverPage({ params }: DriverPageProps) {
         </div>
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <section className="driver-status-strip mt-6" aria-label="Estado del pedido">
+        {orderSteps.map((status, index) => {
+          const meta = getStatusMeta(status);
+          const state =
+            status === tracking.status
+              ? "current"
+              : index < currentStatusIndex
+                ? "done"
+                : "pending";
+
+          return (
+            <div
+              key={status}
+              className="driver-status-step"
+              data-state={state}
+              style={{ "--status-color": meta.dot } as CSSProperties}
+            >
+              <span className="driver-status-step__dot">{index + 1}</span>
+              <div>
+                <p>{meta.label}</p>
+                <small>
+                  {state === "current"
+                    ? "Ahora"
+                    : state === "done"
+                      ? "Listo"
+                      : "Pendiente"}
+                </small>
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
+      <section className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.75fr]">
         <article className="panel">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <span className="eyebrow">Pedido activo</span>
-              <h2 className="section-title mt-4">{tracking.code}</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-                Cliente: {tracking.customerName}. Destino: {tracking.destination}.
-              </p>
+              <h2 className="section-title mt-4">Mapa de entrega</h2>
             </div>
             <div className="soft-card-strong text-sm text-[color:var(--muted)]">
               <p className="text-xs uppercase tracking-[0.22em]">Ultima senal</p>
@@ -135,9 +166,10 @@ export default async function DriverPage({ params }: DriverPageProps) {
             <span className="link-chip">{getStatusMeta(tracking.status).label}</span>
             <span className="link-chip">ETA {tracking.etaLabel}</span>
             <span className="link-chip">Repartidor {tracking.driver.name}</span>
+            <span className="link-chip">Cliente {tracking.customerName}</span>
           </div>
 
-          <div className="mt-6">
+          <div className="driver-map-stage mt-6">
             <TrackingMap
               courierLabel={tracking.driver.name}
               destinationLabel={tracking.destination}
@@ -146,31 +178,20 @@ export default async function DriverPage({ params }: DriverPageProps) {
             />
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            {tracking.route.map((stop) => (
-              <div
-                key={stop.label}
-                className="soft-card-strong"
-              >
-                <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                  {stop.kind}
-                </p>
-                <p className="mt-2 font-semibold">{stop.label}</p>
-                <p className="mt-2 text-sm text-[color:var(--muted)]">{stop.window}</p>
-              </div>
-            ))}
-          </div>
+          <DriverTrackingConsole
+            orderId={tracking.id}
+            trackingCode={tracking.code}
+            courierId={tracking.driver.id}
+            currentStatus={tracking.status}
+            destinationLocation={tracking.destinationLocation}
+            initialLiveLocation={tracking.liveLocation}
+          />
         </article>
 
         <div className="space-y-6">
           <article className="panel">
             <span className="eyebrow">Flujo del pedido</span>
-            <h2 className="section-title mt-4">Ultimas acciones operativas</h2>
-            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              Para que el tracking se sienta vivo, primero lleva el pedido a{" "}
-              <strong>En camino</strong>. Eso deja la sesion lista para mandar
-              ubicaciones del dispositivo.
-            </p>
+            <h2 className="section-title mt-4">Siguiente accion</h2>
 
             <div className="mt-6 flex flex-wrap gap-3">
               {nextStatusLabel ? (
@@ -220,16 +241,6 @@ export default async function DriverPage({ params }: DriverPageProps) {
             customerName={tracking.customerName}
             customerPhone={tracking.customerPhone}
             businessName={tracking.businessName}
-          />
-
-          <DriverTrackingConsole
-            orderId={tracking.id}
-            trackingCode={tracking.code}
-            courierId={tracking.driver.id}
-            currentStatus={tracking.status}
-            trackingEnabled={tracking.trackingEnabled}
-            destinationLocation={tracking.destinationLocation}
-            initialLiveLocation={tracking.liveLocation}
           />
 
           <InstallCta />

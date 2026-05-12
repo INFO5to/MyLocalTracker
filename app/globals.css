@@ -1015,6 +1015,99 @@ select {
     background: var(--accent);
   }
 
+  .driver-status-strip {
+    @apply grid gap-3;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .driver-status-step {
+    @apply relative overflow-hidden rounded-[1.5rem] border p-4;
+    min-height: 112px;
+    color: var(--muted);
+    background:
+      radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--status-color) 20%, transparent 80%), transparent 34%),
+      color-mix(in srgb, var(--panel-strong) 74%, transparent 26%);
+    border-color: color-mix(in srgb, var(--status-color) 18%, var(--border) 82%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 22px 54px -42px var(--shadow);
+  }
+
+  .driver-status-step[data-state="current"] {
+    color: var(--foreground);
+    border-color: color-mix(in srgb, var(--status-color) 54%, var(--border) 46%);
+    background:
+      radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--status-color) 44%, transparent 56%), transparent 36%),
+      linear-gradient(135deg, color-mix(in srgb, var(--status-color) 20%, var(--panel-strong) 80%), color-mix(in srgb, var(--panel) 88%, transparent 12%));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 28px 70px -42px color-mix(in srgb, var(--status-color) 72%, transparent 28%);
+  }
+
+  .driver-status-step[data-state="done"] {
+    color: color-mix(in srgb, var(--foreground) 82%, var(--muted) 18%);
+  }
+
+  .driver-status-step p {
+    @apply mt-4 text-sm font-semibold;
+  }
+
+  .driver-status-step small {
+    @apply mt-1 block text-[0.68rem] font-semibold uppercase tracking-[0.16em];
+    color: color-mix(in srgb, var(--muted) 84%, transparent 16%);
+  }
+
+  .driver-status-step__dot {
+    @apply grid h-9 w-9 place-items-center rounded-full text-xs font-bold;
+    color: white;
+    background: var(--status-color);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.42),
+      0 18px 32px -18px color-mix(in srgb, var(--status-color) 88%, transparent 12%);
+  }
+
+  .driver-map-stage .tracking-map-shell {
+    min-height: clamp(430px, 54vh, 650px);
+  }
+
+  .driver-map-stage .tracking-map-canvas {
+    height: clamp(430px, 54vh, 650px);
+  }
+
+  .driver-location-console {
+    @apply mt-4 flex flex-col gap-4 rounded-[1.65rem] border p-4 sm:flex-row sm:items-center sm:justify-between;
+    background: color-mix(in srgb, var(--panel-strong) 86%, transparent 14%);
+    border-color: var(--border);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 20px 46px -36px var(--shadow);
+  }
+
+  .driver-location-console__status {
+    @apply min-w-0;
+  }
+
+  .driver-location-console__status strong {
+    @apply mt-1 block text-lg;
+  }
+
+  .driver-location-console__status small,
+  .driver-location-console__message {
+    color: var(--muted);
+  }
+
+  .driver-location-console__status small {
+    @apply mt-1 block text-xs font-semibold uppercase tracking-[0.16em];
+  }
+
+  .driver-location-console__action {
+    @apply shrink-0;
+  }
+
+  .driver-location-console__message {
+    @apply text-sm leading-6 sm:max-w-xs;
+  }
+
   .route-stop {
     @apply relative z-10 flex w-full items-center justify-between gap-3 rounded-[1.35rem] border px-4 py-3;
     background: color-mix(in srgb, var(--panel-soft) 88%, transparent 12%);
