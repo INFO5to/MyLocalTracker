@@ -49,6 +49,35 @@ function CourierDetailCell({
   );
 }
 
+function CourierAddIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      className="h-16 w-16"
+      fill="none"
+    >
+      <path
+        d="M20 44h24M24 36h16M18 24h28"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14 16h36a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6V22a6 6 0 0 1 6-6Z"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        d="M44 8v16M36 16h16"
+        stroke="currentColor"
+        strokeWidth="4.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function CourierManagementPanel({
   couriers,
 }: CourierManagementPanelProps) {
@@ -63,57 +92,35 @@ export function CourierManagementPanel({
   });
 
   return (
-    <section className="mt-6 grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
-      <div className="space-y-6">
-        <article className="panel panel-strong">
-          <span className="eyebrow">Modulo dedicado</span>
-          <h2 className="section-title mt-4">Controla el turno de repartidores aparte.</h2>
-          <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-            Este modulo existe para que pedidos y repartidores no compitan por
-            espacio visual. Aqui puedes dar de alta, editar o mandar a
-            descanso a cada repartidor.
-          </p>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="soft-card-strong">
-              <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                Total
-              </p>
-              <p className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
-                {couriers.length}
-              </p>
-            </div>
-            <div className="soft-card-strong">
-              <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                Disponibles
-              </p>
-              <p className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
-                {activeCouriers.length}
-              </p>
-            </div>
-            <div className="soft-card-strong">
-              <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--muted)]">
-                En descanso
-              </p>
-              <p className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
-                {restingCouriers.length}
-              </p>
-            </div>
+    <section className="mt-6 space-y-6">
+      <details className="panel panel-strong courier-create-fold">
+        <summary className="courier-create-summary">
+          <div className="courier-create-button">
+            <span className="courier-create-button__icon">
+              <CourierAddIcon />
+            </span>
+            <span className="courier-create-button__title">Nuevo repartidor</span>
           </div>
-        </article>
 
-        <article className="panel">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <span className="eyebrow">Nuevo registro</span>
-              <h3 className="section-title mt-4">Agregar repartidor</h3>
-            </div>
-            <CourierStatusBadge isActive />
+          <div className="min-w-0">
+            <span className="eyebrow">Alta rapida</span>
+            <h2 className="section-title mt-4">Agregar o preparar un repartidor.</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
+              Abre este modulo solo cuando necesites registrar o activar a alguien
+              para el turno.
+            </p>
           </div>
+
+          <div className="courier-create-stats">
+            <span>{couriers.length} total</span>
+            <span>{activeCouriers.length} disponibles</span>
+            <span>{restingCouriers.length} descanso</span>
+          </div>
+        </summary>
 
           <form
             action={saveCourierAction}
-            className="mt-6 grid gap-4 md:grid-cols-2"
+            className="courier-create-form grid gap-4 border-t pt-6 md:grid-cols-2"
           >
             <label className="field">
               <span className="field-label">Nombre completo</span>
@@ -184,8 +191,7 @@ export function CourierManagementPanel({
               </span>
             </div>
           </form>
-        </article>
-      </div>
+      </details>
 
       <article className="panel">
         <div className="flex flex-wrap items-center justify-between gap-3">

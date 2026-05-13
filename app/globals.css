@@ -1224,34 +1224,32 @@ select {
     @apply inline-flex w-full flex-col items-center justify-center gap-3 rounded-[2rem] border p-4 text-center transition duration-300 sm:w-auto;
     min-height: 188px;
     min-width: 188px;
-    color: var(--brand-deep);
-    border-color: color-mix(in srgb, var(--brand) 22%, var(--border) 78%);
+    color: white;
+    border-color: color-mix(in srgb, #ff9ab3 52%, var(--border) 48%);
     background:
-      radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.66), transparent 38%),
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--panel-strong) 82%, white 18%) 0%,
-        color-mix(in srgb, var(--brand) 12%, var(--panel-strong) 88%) 100%
-      );
+      radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.55), transparent 24%),
+      radial-gradient(circle at 72% 72%, rgba(178, 110, 255, 0.48), transparent 34%),
+      linear-gradient(145deg, #ff6f91 0%, #ff8f70 54%, #ffc0d1 100%);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.68),
-      0 26px 60px -36px var(--shadow-strong);
+      0 26px 60px -34px rgba(255, 111, 145, 0.62);
   }
 
   .order-launch-button:hover {
     transform: translateY(-2px) scale(1.01);
-    border-color: color-mix(in srgb, var(--brand) 42%, var(--border) 58%);
+    border-color: color-mix(in srgb, #ffc0d1 68%, var(--border) 32%);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.72),
-      0 30px 70px -34px var(--glow);
+      0 30px 74px -32px rgba(255, 111, 145, 0.76);
   }
 
   .order-launch-button[aria-expanded="true"] {
     color: white;
-    border-color: color-mix(in srgb, var(--brand-strong) 72%, white 28%);
+    border-color: rgba(255, 255, 255, 0.4);
     background:
-      radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.32), transparent 36%),
-      linear-gradient(180deg, var(--brand) 0%, var(--brand-strong) 100%);
+      radial-gradient(circle at 28% 20%, rgba(255, 255, 255, 0.45), transparent 28%),
+      radial-gradient(circle at 74% 76%, rgba(160, 94, 255, 0.52), transparent 34%),
+      linear-gradient(145deg, #ff4f7f 0%, #ee6a56 58%, #a855f7 100%);
   }
 
   .order-launch-button__icon {
@@ -1259,11 +1257,11 @@ select {
     width: 128px;
     height: 128px;
     background:
-      radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.62), transparent 34%),
-      color-mix(in srgb, var(--accent) 22%, var(--panel-strong) 78%);
+      radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.72), transparent 34%),
+      rgba(255, 255, 255, 0.18);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.62),
-      0 18px 34px -26px var(--shadow);
+      inset 0 1px 0 rgba(255, 255, 255, 0.54),
+      0 18px 34px -24px rgba(70, 20, 38, 0.58);
   }
 
   .order-launch-button__title {
@@ -1303,18 +1301,15 @@ select {
     @apply inline-flex w-full flex-col items-center justify-center gap-3 rounded-[2rem] border p-4 text-center no-underline transition duration-300 sm:w-auto;
     min-height: 174px;
     min-width: 174px;
-    color: var(--brand-deep);
-    border-color: color-mix(in srgb, var(--brand) 18%, var(--border) 82%);
+    color: white;
+    border-color: color-mix(in srgb, #a78bfa 42%, var(--border) 58%);
     background:
-      radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.62), transparent 38%),
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--panel-strong) 86%, white 14%) 0%,
-        color-mix(in srgb, var(--accent) 10%, var(--panel-strong) 90%) 100%
-      );
+      radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.42), transparent 28%),
+      radial-gradient(circle at 76% 70%, rgba(89, 222, 255, 0.38), transparent 34%),
+      linear-gradient(145deg, #3b2c86 0%, #6d45c9 54%, #c084fc 100%);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.62),
-      0 24px 54px -36px var(--shadow-strong);
+      inset 0 1px 0 rgba(255, 255, 255, 0.48),
+      0 24px 60px -34px rgba(109, 69, 201, 0.62);
   }
 
   .new-order-actions .history-launch-button {
@@ -1324,18 +1319,18 @@ select {
 
   .history-launcher:hover .history-launch-button {
     transform: translateY(-2px) scale(1.01);
-    border-color: color-mix(in srgb, var(--brand) 34%, var(--border) 66%);
+    border-color: color-mix(in srgb, #ddd6fe 62%, var(--border) 38%);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.68),
-      0 28px 66px -36px var(--glow);
+      inset 0 1px 0 rgba(255, 255, 255, 0.56),
+      0 28px 70px -34px rgba(109, 69, 201, 0.76);
   }
 
   .history-launch-button:hover {
     transform: translateY(-2px) scale(1.01);
-    border-color: color-mix(in srgb, var(--brand) 34%, var(--border) 66%);
+    border-color: color-mix(in srgb, #ddd6fe 62%, var(--border) 38%);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.68),
-      0 28px 66px -36px var(--glow);
+      inset 0 1px 0 rgba(255, 255, 255, 0.56),
+      0 28px 70px -34px rgba(109, 69, 201, 0.76);
   }
 
   .history-fold[open] .history-launch-button {
@@ -1352,10 +1347,10 @@ select {
     height: 116px;
     background:
       radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.58), transparent 34%),
-      color-mix(in srgb, var(--accent) 18%, var(--panel-strong) 82%);
+      rgba(255, 255, 255, 0.14);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.58),
-      0 18px 34px -26px var(--shadow);
+      inset 0 1px 0 rgba(255, 255, 255, 0.42),
+      0 18px 34px -24px rgba(24, 18, 62, 0.64);
   }
 
   .new-order-actions .history-launch-button__icon {
@@ -1377,9 +1372,85 @@ select {
 
   .launch-count-pill {
     @apply rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em];
-    color: var(--muted);
-    background: color-mix(in srgb, var(--panel-strong) 82%, transparent 18%);
+    color: white;
+    background: rgba(255, 255, 255, 0.14);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+
+  .courier-create-fold {
+    overflow: hidden;
+  }
+
+  .courier-create-fold > summary {
+    list-style: none;
+  }
+
+  .courier-create-fold > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .courier-create-summary {
+    @apply grid cursor-pointer items-center gap-6 md:grid-cols-[auto_1fr_auto];
+  }
+
+  .courier-create-button {
+    @apply inline-flex w-full flex-col items-center justify-center gap-3 rounded-[2rem] border p-4 text-center transition duration-300 sm:w-auto;
+    min-height: 188px;
+    min-width: 188px;
+    color: white;
+    border-color: rgba(153, 246, 228, 0.42);
+    background:
+      radial-gradient(circle at 28% 20%, rgba(255, 255, 255, 0.5), transparent 28%),
+      radial-gradient(circle at 78% 76%, rgba(244, 114, 182, 0.44), transparent 34%),
+      linear-gradient(145deg, #14b8a6 0%, #38bdf8 48%, #f472b6 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 26px 60px -34px rgba(20, 184, 166, 0.58);
+  }
+
+  .courier-create-summary:hover .courier-create-button,
+  .courier-create-fold[open] .courier-create-button {
+    transform: translateY(-2px) scale(1.01);
+    border-color: rgba(255, 255, 255, 0.48);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.58),
+      0 30px 74px -32px rgba(56, 189, 248, 0.72);
+  }
+
+  .courier-create-button__icon {
+    @apply flex items-center justify-center rounded-full;
+    width: 122px;
+    height: 122px;
+    background:
+      radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.68), transparent 34%),
+      rgba(255, 255, 255, 0.16);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.42),
+      0 18px 34px -24px rgba(7, 89, 133, 0.56);
+  }
+
+  .courier-create-button__title {
+    font-family: var(--font-display), serif;
+    font-size: clamp(1.1rem, 2.3vw, 1.55rem);
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .courier-create-stats {
+    @apply flex flex-wrap gap-2 md:flex-col md:items-end;
+  }
+
+  .courier-create-stats span {
+    @apply rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em];
+    color: var(--foreground);
+    border-color: var(--border);
+    background: color-mix(in srgb, var(--panel-strong) 88%, transparent 12%);
+  }
+
+  .courier-create-form {
+    margin-top: 1.5rem;
+    border-color: var(--border);
   }
 
   .history-toggle-label {
