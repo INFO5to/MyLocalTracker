@@ -78,36 +78,35 @@ function ClipboardCheckIcon() {
     <svg
       aria-hidden="true"
       viewBox="0 0 64 64"
-      className="h-16 w-16"
+      className="h-20 w-20"
       fill="none"
     >
       <path
-        d="M22 13h-3.5A6.5 6.5 0 0 0 12 19.5v31A6.5 6.5 0 0 0 18.5 57h27A6.5 6.5 0 0 0 52 50.5v-31A6.5 6.5 0 0 0 45.5 13H42"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M32 4.5c15.2 0 27.5 12.3 27.5 27.5S47.2 59.5 32 59.5 4.5 47.2 4.5 32 16.8 4.5 32 4.5Z"
+        fill="#df554c"
       />
       <path
-        d="M22 17h20v-2.5A7.5 7.5 0 0 0 34.5 7h-5A7.5 7.5 0 0 0 22 14.5V17Z"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M19.5 16.5h25A4.5 4.5 0 0 1 49 21v27a4.5 4.5 0 0 1-4.5 4.5h-25A4.5 4.5 0 0 1 15 48V21a4.5 4.5 0 0 1 4.5-4.5Z"
+        fill="#f7fafc"
       />
       <path
-        d="m25 36 6 6 11-16"
-        stroke="currentColor"
+        d="M23 13h18a4 4 0 0 1 4 4v2.5H19V17a4 4 0 0 1 4-4Z"
+        fill="#254455"
+      />
+      <path
+        d="M23 30h14M23 39h10"
+        stroke="#254455"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="m31 47 5 5 10-14"
+        stroke="#43aa96"
         strokeWidth="4.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M23 28h10M23 48h18"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
+      <path d="M44 27h9v20h-9z" fill="#e0bd4f" />
     </svg>
   );
 }
@@ -117,39 +116,39 @@ function StopwatchIcon() {
     <svg
       aria-hidden="true"
       viewBox="0 0 64 64"
-      className="h-16 w-16"
+      className="h-20 w-20"
       fill="none"
     >
       <path
-        d="M24 7h16M32 7v8M50 13l5 5M51 19l-4 4"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M32 4.5c15.2 0 27.5 12.3 27.5 27.5S47.2 59.5 32 59.5 4.5 47.2 4.5 32 16.8 4.5 32 4.5Z"
+        fill="#df554c"
       />
       <path
-        d="M32 57c12.7 0 23-10.3 23-23S44.7 11 32 11 9 21.3 9 34s10.3 23 23 23Z"
-        stroke="currentColor"
-        strokeWidth="4"
+        d="M21 12h22v6c0 5.4-3.6 9.2-7.6 12 4 2.8 7.6 6.6 7.6 12v10H21V42c0-5.4 3.6-9.2 7.6-12-4-2.8-7.6-6.6-7.6-12v-6Z"
+        fill="#f7fafc"
       />
       <path
-        d="M13 34a19 19 0 0 1 19-19"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M32 24v10h12"
-        stroke="currentColor"
+        d="M18 12h28M18 52h28"
+        stroke="#254455"
         strokeWidth="4.5"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
       <path
-        d="M19 34h-4M49 34h-4M32 17v4M32 47v4M44 22l-3 3M23 43l-3 3"
-        stroke="currentColor"
-        strokeWidth="3.5"
+        d="M25 20h14l-7 8-7-8ZM25 47c2.8-5 11.2-5 14 0H25Z"
+        fill="#d9bd55"
+      />
+      <path
+        d="M42 30a11 11 0 1 1-5 15.2"
+        stroke="#254455"
+        strokeWidth="3.2"
         strokeLinecap="round"
+      />
+      <path
+        d="M47 34v8h7"
+        stroke="#43aa96"
+        strokeWidth="3.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
