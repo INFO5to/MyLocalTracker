@@ -357,17 +357,6 @@ function shiftDateKey(dateKey: string, deltaDays: number) {
   return date.toISOString().slice(0, 10);
 }
 
-function getEventTypeLabel(eventType: string) {
-  if (eventType === "created") {
-    return "Creados";
-  }
-
-  const status = normalizeStatus(eventType);
-  const meta = getStatusMeta(status);
-
-  return meta.label;
-}
-
 function mapLocationRowToTrackingLocation(row: GenericRecord | null) {
   if (!row) {
     return null;
@@ -672,8 +661,8 @@ export async function getExecutiveMovementSnapshot(
 
   try {
     const { data, error } = await supabase
-      .from("order_events")
-      .select("id, tracking_code, event_type, title, created_at")
+      .from("orders")
+      .select("id, tracking_code, customer_name, status, created_at")
       .order("created_at", { ascending: false })
       .limit(500);
 
@@ -682,7 +671,7 @@ export async function getExecutiveMovementSnapshot(
     }
 
     const rows = (data ?? []).map((row) => row as GenericRecord);
-    const eventsByDate = rows.reduce<Record<string, GenericRecord[]>>(
+    const ordersByDate = rows.reduce<Record<string, GenericRecord[]>>(
       (accumulator, row) => {
         const dateKey = formatLocalDateKey(row.created_at);
 
@@ -696,16 +685,28 @@ export async function getExecutiveMovementSnapshot(
       },
       {},
     );
-    const selectedRows = eventsByDate[selectedDate] ?? [];
-    const eventTypeCounts = selectedRows.reduce<Record<string, number>>(
-      (accumulator, row) => {
-        const eventType =
-          typeof row.event_type === "string" ? row.event_type : "created";
-        accumulator[eventType] = (accumulator[eventType] ?? 0) + 1;
-        return accumulator;
-      },
-      {},
+    const selectedRows = ordersByDate[selectedDate] ?? [];
+    const deliveredOrders = selectedRows.filter(
+      (row) => normalizeStatus(row.status) === "delivered",
     );
+    const activeOrders = selectedRows.length - deliveredOrders.length;
+    const dailySummaryBuckets = [
+      {
+        key: "created",
+        label: "Pedidos creados",
+        total: selectedRows.length,
+      },
+      {
+        key: "active",
+        label: "Activos ahora",
+        total: activeOrders,
+      },
+      {
+        key: "delivered",
+        label: "Entregados",
+        total: deliveredOrders.length,
+      },
+    ].filter((bucket) => bucket.total > 0 || bucket.key === "created");
 
     return {
       selectedDate,
@@ -713,7 +714,7 @@ export async function getExecutiveMovementSnapshot(
       weeklyBuckets: weeklyKeys.map((key) => ({
         key,
         label: formatLocalDateLabelFromKey(key),
-        total: eventsByDate[key]?.length ?? 0,
+        total: ordersByDate[key]?.length ?? 0,
       })),
       selectedEvents: selectedRows.slice(0, 8).map((row) => ({
         id:
@@ -722,16 +723,14 @@ export async function getExecutiveMovementSnapshot(
             : `${typeof row.tracking_code === "string" ? row.tracking_code : "evento"}-${typeof row.created_at === "string" ? row.created_at : crypto.randomUUID()}`,
         trackingCode:
           typeof row.tracking_code === "string" ? row.tracking_code : "LT-0000",
-        title: typeof row.title === "string" ? row.title : "Movimiento",
-        eventType:
-          typeof row.event_type === "string" ? row.event_type : "created",
+        title:
+          typeof row.customer_name === "string"
+            ? row.customer_name
+            : "Pedido registrado",
+        eventType: normalizeStatus(row.status),
         occurredAtLabel: formatClockTimestamp(row.created_at),
       })),
-      eventTypeBuckets: Object.entries(eventTypeCounts).map(([key, total]) => ({
-        key,
-        label: getEventTypeLabel(key),
-        total,
-      })),
+      eventTypeBuckets: dailySummaryBuckets,
       totalSelectedEvents: selectedRows.length,
     };
   } catch {

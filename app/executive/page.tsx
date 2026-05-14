@@ -49,7 +49,7 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
     1,
     ...movement.weeklyBuckets.map((bucket) => bucket.total),
   );
-  const maxEventTypeMovements = Math.max(
+  const maxDailySummaryCount = Math.max(
     1,
     ...movement.eventTypeBuckets.map((bucket) => bucket.total),
   );
@@ -61,7 +61,6 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
         channelName="executive-dashboard"
         targets={[
           { table: "orders" },
-          { table: "order_events" },
           { table: "couriers" },
           { table: "courier_locations" },
         ]}
@@ -218,7 +217,7 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <span className="eyebrow">Historial operativo</span>
-              <h2 className="section-title mt-4">Movimientos por fecha</h2>
+              <h2 className="section-title mt-4">Pedidos por fecha</h2>
             </div>
             <form action="/executive" className="executive-date-form">
               <input
@@ -226,7 +225,7 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
                 name="date"
                 defaultValue={movement.selectedDate}
                 className="executive-date-input"
-                aria-label="Filtrar movimientos por fecha"
+                aria-label="Filtrar pedidos por fecha"
               />
               <button type="submit" className="ios-button-secondary">
                 Ver dia
@@ -237,7 +236,7 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
           <div className="mt-6 rounded-[1.8rem] border border-[color:var(--border)] p-5">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="text-sm text-[color:var(--muted)]">Movimientos del dia</p>
+                <p className="text-sm text-[color:var(--muted)]">Pedidos realizados</p>
                 <p className="metric-value mt-2">{movement.totalSelectedEvents}</p>
               </div>
               <p className="text-right text-xs uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
@@ -247,7 +246,7 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
 
             <div
               className="executive-week-chart mt-6"
-              aria-label="Movimientos de los ultimos siete dias"
+              aria-label="Pedidos realizados en los ultimos siete dias"
             >
               {movement.weeklyBuckets.map((bucket) => (
                 <div key={bucket.key} className="executive-week-column">
@@ -272,12 +271,12 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
           <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
             <div className="soft-card-strong">
               <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
-                Estados del dia
+                Resumen del dia
               </p>
               <div className="mt-4 space-y-3">
                 {movement.eventTypeBuckets.length === 0 ? (
                   <p className="text-sm text-[color:var(--muted)]">
-                    Sin movimientos registrados.
+                    Sin pedidos registrados.
                   </p>
                 ) : (
                   movement.eventTypeBuckets.map((bucket) => (
@@ -290,7 +289,7 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
                               "--type-width": `${Math.max(
                                 12,
                                 Math.round(
-                                  (bucket.total / maxEventTypeMovements) * 100,
+                                  (bucket.total / maxDailySummaryCount) * 100,
                                 ),
                               )}%`,
                             } as CSSProperties
@@ -306,12 +305,12 @@ export default async function ExecutivePage({ searchParams }: ExecutivePageProps
 
             <div className="soft-card-strong">
               <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--brand-deep)]">
-                Ultimos eventos
+                Pedidos del dia
               </p>
               <div className="mt-4 space-y-2">
                 {movement.selectedEvents.length === 0 ? (
                   <p className="text-sm text-[color:var(--muted)]">
-                    No hay eventos para esta fecha.
+                    No hay pedidos para esta fecha.
                   </p>
                 ) : (
                   movement.selectedEvents.map((event) => (
