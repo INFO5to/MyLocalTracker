@@ -19,9 +19,7 @@ const initialState: LoginActionState = {
 const roleModes = {
   owner: {
     label: "Dominante",
-    title: "Control total del sistema",
-    description:
-      "Gestiona pedidos, repartidores y toda la operacion interna desde el panel principal.",
+    title: "Control principal",
     identifierLabel: "Correo",
     identifierPlaceholder: "dueno@localtracker.app",
     prefillIdentifier: "",
@@ -29,9 +27,7 @@ const roleModes = {
   },
   staff: {
     label: "Staff",
-    title: "Operacion del turno",
-    description:
-      "Pensado para quien confirma pedidos, mueve estados y coordina el turno.",
+    title: "Panel de staff",
     identifierLabel: "Correo",
     identifierPlaceholder: "staff@localtracker.app",
     prefillIdentifier: "staff@localtracker.app",
@@ -39,9 +35,7 @@ const roleModes = {
   },
   driver: {
     label: "Driver",
-    title: "Ruta y seguimiento vivo",
-    description:
-      "Usa este acceso para entrar a tu panel de repartidor con tu ID de acceso y tu contrasena.",
+    title: "Vista de repartidor",
     identifierLabel: "ID de repartidor",
     identifierPlaceholder: "DRV-001",
     prefillIdentifier: "",
@@ -83,51 +77,19 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
   const roleMode = roleModes[selectedRole];
 
   return (
-    <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-      <article className="panel panel-strong flex flex-col justify-between gap-6">
-        <div className="space-y-4">
-          <span className="eyebrow">Control principal</span>
-          <div className="space-y-3">
-            <h1 className="display-title text-4xl sm:text-5xl">
-              El acceso interno ahora se siente como la puerta principal del sistema.
-            </h1>
-            <p className="max-w-2xl text-base leading-7 text-[color:var(--muted)]">
-              Esta entrada esta reservada para negocio, staff y repartidores
-              internos. El cliente final nunca pasa por aqui: solo usa su link
-              privado de tracking.
-            </p>
+    <section className="login-stage">
+      <form action={formAction} className="login-card">
+        <div className="login-brand">
+          <div className="brand-mark" aria-hidden="true">
+            LT
+          </div>
+          <div>
+            <span>LocalTracker</span>
+            <strong>Acceso interno</strong>
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            {
-              title: "Owner",
-              text: "Administra modulos, usuarios y configuracion del negocio.",
-            },
-            {
-              title: "Staff",
-              text: "Opera pedidos, asigna repartidores y mueve estados.",
-            },
-            {
-              title: "Driver",
-              text: "Entra a su panel propio para tomar ruta y emitir ubicaciones.",
-            },
-          ].map((role) => (
-            <div key={role.title} className="soft-card-strong">
-              <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--brand-deep)]">
-                {role.title}
-              </p>
-              <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">
-                {role.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      </article>
-
-      <form action={formAction} className="panel panel-strong">
-        <div className="flex flex-col items-center text-center">
+        <div className="login-avatar-zone">
           <button
             type="button"
             className="access-avatar"
@@ -142,7 +104,7 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
           {showRoleMenu ? (
             <div
               id="login-role-menu"
-              className="mt-4 flex flex-wrap justify-center gap-2"
+              className="login-role-menu"
             >
               {(
                 Object.entries(roleModes) as Array<[RoleMode, (typeof roleModes)[RoleMode]]>
@@ -150,9 +112,9 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
                 <button
                   key={roleKey}
                   type="button"
-                  className={
-                    roleKey === selectedRole ? "ios-button" : "ios-button-secondary"
-                  }
+                  className={`login-role-option ${
+                    roleKey === selectedRole ? "is-active" : ""
+                  }`}
                   onClick={() => {
                     setSelectedRole(roleKey);
                     setIdentifierValue(roleValue.prefillIdentifier);
@@ -164,21 +126,14 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
               ))}
             </div>
           ) : null}
-          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]">
-            Acceso interno - {roleMode.label}
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-[color:var(--foreground)]">
-            {roleMode.title}
-          </h2>
-          <p className="mt-3 max-w-md text-sm leading-7 text-[color:var(--muted)]">
-            {roleMode.description}
-          </p>
+          <span className="login-role-label">{roleMode.label}</span>
+          <h1>{roleMode.title}</h1>
         </div>
 
         <input type="hidden" name="next" value={nextPath} />
         <input type="hidden" name="role_hint" value={selectedRole} />
 
-        <div className="mt-8 grid gap-4">
+        <div className="login-fields">
           <label className="field">
             <span className="field-label">{roleMode.identifierLabel}</span>
             <input
@@ -208,23 +163,16 @@ export function LoginForm({ nextPath, initialMessage }: LoginFormProps) {
           </label>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={pending} className="ios-button">
+        <div className="login-actions">
+          <button type="submit" disabled={pending} className="login-submit-button">
             {pending ? "Entrando..." : "Entrar al sistema"}
           </button>
-          <span className="link-chip">Panel protegido por rol</span>
         </div>
-
-        <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-          {selectedRole === "driver"
-            ? "Cada repartidor entra con su ID de acceso y su propia contrasena. El sistema resuelve internamente a quien pertenece ese panel."
-            : "Si quieres manejar cuentas demo separadas, crea los usuarios en Supabase Auth con el rol correspondiente. Las restricciones de Owner, Staff y Driver ya se aplican dentro del sistema."}
-        </p>
 
         {message ? (
           <p
             aria-live="polite"
-            className={`mt-4 text-sm ${isError ? "text-red-700" : "text-emerald-700"}`}
+            className={`login-message ${isError ? "is-error" : "is-success"}`}
           >
             {message}
           </p>

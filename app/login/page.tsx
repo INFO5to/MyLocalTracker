@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { SiteHeader } from "@/app/_components/site-header";
 import { LoginForm } from "@/app/login/_components/login-form";
 import {
   getOptionalInternalSession,
@@ -31,12 +30,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <main className="page-shell">
-      <SiteHeader />
-
-      <section className="mx-auto mt-6 max-w-6xl">
-        <LoginForm nextPath={nextPath} initialMessage={params.message} />
-      </section>
+    <main className="login-page-shell">
+      <LoginForm nextPath={nextPath} initialMessage={params.message} />
     </main>
   );
 }
