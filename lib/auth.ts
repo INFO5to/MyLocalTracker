@@ -23,6 +23,10 @@ export function getDefaultPathForRole(role: InternalRole) {
   return role === "driver" ? "/driver" : "/dashboard";
 }
 
+function isPathOrNested(path: string, basePath: string) {
+  return path === basePath || path.startsWith(`${basePath}/`);
+}
+
 export function resolveInternalPathForRole(
   role: InternalRole,
   nextPath?: string | null,
@@ -34,12 +38,19 @@ export function resolveInternalPathForRole(
   }
 
   if (role === "driver") {
-    if (nextPath === "/dashboard" || nextPath.startsWith("/couriers")) {
+    if (
+      isPathOrNested(nextPath, "/dashboard") ||
+      isPathOrNested(nextPath, "/couriers") ||
+      isPathOrNested(nextPath, "/executive")
+    ) {
       return fallbackPath;
     }
   }
 
-  if ((role === "owner" || role === "staff") && nextPath === "/driver") {
+  if (
+    (role === "owner" || role === "staff") &&
+    isPathOrNested(nextPath, "/driver")
+  ) {
     return fallbackPath;
   }
 

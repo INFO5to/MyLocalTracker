@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import {
+  type InternalRole,
   getOptionalInternalSession,
   resolveInternalPathForRole,
 } from "@/lib/auth";
@@ -25,6 +26,20 @@ function sanitizeNextPath(value: string) {
   return value;
 }
 
+function normalizeRoleHint(value: string): InternalRole | null {
+  if (value === "owner" || value === "staff" || value === "driver") {
+    return value;
+  }
+
+  return null;
+}
+
+const roleAccessLabels = {
+  owner: "Dominante",
+  staff: "Staff",
+  driver: "Driver",
+} satisfies Record<InternalRole, string>;
+
 export async function signInInternalAction(
   _prevState: LoginActionState,
   formData: FormData,
@@ -39,16 +54,24 @@ export async function signInInternalAction(
   }
 
   const roleHint = asString(formData.get("role_hint")).toLowerCase();
+  const expectedRole = normalizeRoleHint(roleHint);
   const identifier = asString(formData.get("identifier"));
   const password = asString(formData.get("password"));
   const nextPathInput = asString(formData.get("next"));
   const nextPath = nextPathInput ? sanitizeNextPath(nextPathInput) : null;
 
+  if (!expectedRole) {
+    return {
+      status: "error",
+      message: "Selecciona un tipo de acceso valido antes de entrar.",
+    };
+  }
+
   if (!identifier || !password) {
     return {
       status: "error",
       message:
-        roleHint === "driver"
+        expectedRole === "driver"
           ? "ID de repartidor y contrasena son obligatorios."
           : "Correo y contrasena son obligatorios.",
     };
@@ -56,7 +79,7 @@ export async function signInInternalAction(
 
   let email = identifier.toLowerCase();
 
-  if (roleHint === "driver") {
+  if (expectedRole === "driver") {
     const normalizedDriverLoginId = normalizeDriverLoginId(identifier);
     const { data: resolvedDriver, error: resolveError } = await supabase
       .rpc("resolve_driver_login", {
@@ -111,6 +134,17 @@ export async function signInInternalAction(
       status: "error",
       message:
         "La cuenta existe, pero aun no tiene permisos internos en LocalTracker.",
+    };
+  }
+
+  if (internalSession.profile.role !== expectedRole) {
+    await supabase.auth.signOut();
+
+    return {
+      status: "error",
+      message: `Este usuario esta registrado como ${
+        roleAccessLabels[internalSession.profile.role]
+      }. Entra desde ese tipo de acceso o revisa su rol en Supabase.`,
     };
   }
 
